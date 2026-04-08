@@ -219,16 +219,6 @@ def generate_pdf_from_sequence(sequence: list[Path], pdf_path: Path):
     with open(pdf_path, "wb") as f:
         f.write(img2pdf.convert([str(p) for p in sequence]))
 
-    tmp = pdf_path.with_suffix('.tmp.pdf')
-    subprocess.run([
-        'gs', '-sDEVICE=pdfwrite',
-        '-dCompatibilityLevel=1.4',
-        '',
-        '-dNOPAUSE', '-dQUIET', '-dBATCH',
-        f'-sOutputFile={tmp}',
-        str(pdf_path)
-    ], check=True)
-    tmp.replace(pdf_path)
 
 
 def format_size(num_bytes: int) -> str:
