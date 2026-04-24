@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: minio
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: password_molto_sicura
+    volumes:
+      - /srv/coloringitaly/minio_data:/data
+    command: server /data --console-address ":9001"
