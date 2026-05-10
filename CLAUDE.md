@@ -16,6 +16,119 @@ Il progetto produce **coloring book per adulti a tema italiano** venduti sul neg
 - Endpoint `/genera_cover` — generazione automatica della copertina
 - Pipeline clipart — gestione e assemblaggio di elementi grafici riutilizzabili
 
+## Specifiche tecniche Etsy e KDP
+
+### Etsy — file digitali
+
+| Parametro | Valore |
+|-----------|--------|
+| File massimi per listing | 5 |
+| Peso massimo per file | **20 MB** |
+| Formati accettati | PDF, PNG, JPG, ZIP, SVG, e altri |
+| Formato consigliato coloring book | PDF (US Letter o A4) |
+| DPI consigliato | 300 DPI minimo |
+
+**Regole Etsy da non violare mai:**
+- Nessun file può superare i **20 MB** — lo ZIP Etsy deve stare sotto questo limite.
+- Il PDF non deve contenere link esterni, JavaScript o contenuti interattivi.
+- Il file deve essere scaricabile immediatamente dopo l'acquisto: non usare link a servizi terzi come file consegnabile.
+
+---
+
+### Etsy — immagini listing e mockup
+
+| Parametro | Valore |
+|-----------|--------|
+| Numero massimo foto per listing | 10 |
+| Peso massimo per foto | 10 MB |
+| Formati accettati | JPG, PNG |
+| Dimensione minima consigliata | 2000 px sul lato corto |
+| Dimensione ottimale | 2000 × 2000 px (quadrata) o 2700 × 2025 px (4:3) |
+| Spazio colore | sRGB |
+
+**Note mockup:**
+- Le prime 1–3 foto determinano il CTR: usare mockup realistici (libro su tavolo, mano che colora).
+- Etsy mostra le anteprime in formato quadrato 170 × 135 px nelle ricerche: il soggetto principale deve essere centrato.
+- Non includere testo fuorviante o loghi di terze parti nelle immagini.
+
+---
+
+### KDP — interni (interior PDF)
+
+| Parametro | Valore |
+|-----------|--------|
+| Formato pagina US Letter | 8,5" × 11" → **2550 × 3300 px** a 300 DPI ✓ |
+| Formato pagina A4 | 8,27" × 11,69" → **2480 × 3508 px** a 300 DPI ✓ |
+| DPI minimo | **300 DPI** |
+| Spazio colore | RGB (per interni a colori) |
+| Carta consigliata coloring book | White (bianca), non Cream |
+| Pagine minime | 24 |
+| Pagine massime | 828 |
+| Peso massimo PDF interni | 650 MB |
+| Bleed interni | Non richiesto (pagine coloring non usano bleed) |
+
+**Margini minimi KDP interni** (distanza dal bordo taglio al contenuto):
+
+| Numero di pagine | Margine interno (gutter) | Margine esterno | Alto/Basso |
+|------------------|--------------------------|-----------------|------------|
+| 24 – 150 | 0,375" (28 px a 300 DPI) | 0,25" (19 px) | 0,25" (19 px) |
+| 151 – 300 | 0,500" (38 px) | 0,25" (19 px) | 0,25" (19 px) |
+| 301 – 500 | 0,625" (47 px) | 0,25" (19 px) | 0,25" (19 px) |
+| 501 – 700 | 0,750" (56 px) | 0,25" (19 px) | 0,25" (19 px) |
+
+> I coloring book sotto i 60 disegni rientrano quasi sempre nella fascia 24–150 pagine (ricorda: ogni disegno genera 2 pagine — art + blank).
+
+**Regole KDP interni da non violare mai:**
+- Ogni pagina d'arte deve essere seguita da una **pagina bianca** (già implementato): evita che l'inchiostro traspaia sul retro.
+- Le immagini non devono sforare nell'area dei margini: il contenuto deve restare nel "safe area".
+- Il PDF deve avere dimensioni di pagina esatte al trim size — niente bleed sugli interni.
+- Non incorporare font se il PDF è solo immagini raster (già il caso con img2pdf).
+
+---
+
+### KDP — copertina (cover PDF)
+
+| Parametro | Valore |
+|-----------|--------|
+| DPI minimo | **300 DPI** |
+| Bleed richiesto | **0,125"** (3,175 mm) su tutti e 4 i lati |
+| Formato consegnato a KDP | PDF unico che include: retro + dorso + fronte + bleed |
+| Ratio fronte copertina (US Letter) | 8,5" × 11" → rapporto **17:22** (circa 0,773:1, formato portrait) |
+| Ratio fronte copertina (A4) | 8,27" × 11,69" → rapporto **1:1,414** (√2, formato portrait) |
+| Larghezza dorso | dipende dal numero di pagine × spessore carta |
+
+**Formula dorso KDP (carta bianca 60#):**
+```
+spessore_dorso_pollici = numero_pagine × 0,002252"
+```
+Esempio per 52 pagine: 52 × 0,002252" = **0,117"** di dorso
+
+**Dimensioni cover completa (US Letter, 52 pagine):**
+```
+larghezza = 0,125" + 8,5" + 0,117" + 8,5" + 0,125" = 17,367"  →  5210 px a 300 DPI
+altezza   = 0,125" + 11" + 0,125"                   = 11,25"   →  3375 px a 300 DPI
+```
+
+**Regole KDP cover da non violare mai:**
+- Il titolo e gli elementi principali devono stare almeno **0,25"** (75 px a 300 DPI) dentro il bordo di taglio — la "safe zone".
+- Il codice a barre KDP occupa l'angolo in basso a destra del retro: lasciare un'area libera di almeno **2" × 1,2"** (600 × 360 px).
+- Il colore di sfondo deve estendersi fino al bleed — mai lasciare bordi bianchi.
+- Non inserire elementi importanti sul dorso se è più stretto di **0,25"**: KDP può non garantire la stampa precisa.
+
+---
+
+### Regole assolute che non si possono mai violare
+
+1. **Etsy:** nessun file digitale sopra 20 MB — controllare sempre prima del caricamento.
+2. **KDP interni:** DPI mai sotto 300 — immagini sotto soglia vengono rifiutate o stampate sfocate.
+3. **KDP interni:** pagine sempre al trim size esatto — niente bleed, niente dimensioni approssimate.
+4. **KDP cover:** bleed di 0,125" obbligatorio su tutti i lati — senza bleed il file viene rifiutato.
+5. **KDP cover:** safe zone di 0,25" rispettata per titolo e autore — elementi fuori safe zone vengono tagliati in stampa.
+6. **Entrambe le piattaforme:** spazio colore RGB — CMYK può causare colori errati o rifiuto del file.
+7. **KDP coloring book:** pagina bianca dopo ogni pagina d'arte — senza di essa l'inchiostro traspare sul retro (bleed-through).
+
+---
+
 ## Cos'è questo servizio
 
 Una Flask REST API a file singolo che normalizza immagini di coloring book e le assembla in PDF pronti per la stampa. L'intera applicazione è `app.py`. Gira come container Docker ed è invocata da n8n in risposta a comandi del bot Telegram.
