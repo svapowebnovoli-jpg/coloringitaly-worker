@@ -14,103 +14,103 @@ Il progetto produce **coloring book per adulti a tema italiano** venduti sul neg
 
 ## Cos'è questo servizio
 
-A single-file Flask REST API that normalizes coloring-book images and assembles them into print-ready PDFs. The entire application is `app.py`. It runs as a Docker container and is called by n8n in response to Telegram bot commands.
+Una Flask REST API a file singolo che normalizza immagini di coloring book e le assembla in PDF pronti per la stampa. L'intera applicazione è `app.py`. Gira come container Docker ed è invocata da n8n in risposta a comandi del bot Telegram.
 
-## Commands
+## Comandi
 
 ```bash
-# Build and start
+# Build e avvio
 docker compose up -d --build
 
-# Restart after editing app.py (the only file that changes)
+# Riavvio dopo aver modificato app.py (l'unico file che cambia)
 docker compose up -d --build
 
-# Live logs
+# Log in tempo reale
 docker compose logs -f
 
-# Run locally (outside Docker) for quick iteration
+# Esecuzione locale (fuori Docker) per iterazioni rapide
 pip install -r requirements.txt
 JOBS_ROOT=/srv/coloringitaly/jobs WORKER_AUTH_TOKEN=... python app.py
 ```
 
-## Environment variables (`.env`)
+## Variabili d'ambiente (`.env`)
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `WORKER_AUTH_TOKEN` | `CHANGE_ME` | Bearer token for all authenticated endpoints |
-| `JOBS_ROOT` | `/srv/coloringitaly/jobs` | Root folder where job directories are created |
-| `CALLBACK_TIMEOUT` | `20` | Seconds before callback POST times out |
-| `TMP_RETENTION_DAYS` | `14` | `/cleanup` removes jobs older than this |
+| Variabile | Default | Scopo |
+|-----------|---------|-------|
+| `WORKER_AUTH_TOKEN` | `CHANGE_ME` | Token di autenticazione per tutti gli endpoint protetti |
+| `JOBS_ROOT` | `/srv/coloringitaly/jobs` | Cartella radice dove vengono creati i job |
+| `CALLBACK_TIMEOUT` | `20` | Secondi prima del timeout della POST di callback |
+| `TMP_RETENTION_DAYS` | `14` | `/cleanup` rimuove i job più vecchi di questo valore |
 
-## Architecture
+## Architettura
 
 ```
-n8n (workflow) ──HTTP──▶ Flask app (app.py, port 8000)
+n8n (workflow) ──HTTP──▶ Flask app (app.py, porta 8000)
                               │
                               ▼
                     /srv/coloringitaly/jobs/<job_id>/
-                      input/raw/          ← user uploads here
-                      input/normalized/   ← written by /importa
-                      output/             ← written by /confeziona
-                      tmp/<variant>/      ← intermediate render frames
+                      input/raw/          ← immagini caricate dall'utente
+                      input/normalized/   ← scritto da /importa
+                      output/             ← scritto da /confeziona
+                      tmp/<variant>/      ← frame intermedi di rendering
                       manifest.json
                       status.json
                       logs/worker.log
 ```
 
-All job I/O is filesystem-based. The container mounts `/srv/coloringitaly` as a volume.
+Tutto l'I/O dei job è basato su filesystem. Il container monta `/srv/coloringitaly` come volume.
 
-## API endpoints
+## Endpoint API
 
-All except `/health` require header `X-Auth-Token: <WORKER_AUTH_TOKEN>`.
+Tutti eccetto `/health` richiedono l'header `X-Auth-Token: <WORKER_AUTH_TOKEN>`.
 
-- `GET /health` — liveness, no auth
-- `GET /status[?job_id=<id>]` — read `status.json` for one job or list all
-- `POST /importa` — scans `input/raw/`, normalizes to `input/normalized/`, writes `manifest.json`
-- `POST /confeziona` — builds 4 PDFs + 1 ZIP from `input/normalized/`, writes to `output/`
-- `POST /cleanup` — deletes jobs in `done`/`error` state older than `older_than_days`
+- `GET /health` — liveness check, senza autenticazione
+- `GET /status[?job_id=<id>]` — legge `status.json` di un job o lista tutti i job
+- `POST /importa` — scansiona `input/raw/`, normalizza in `input/normalized/`, scrive `manifest.json`
+- `POST /confeziona` — genera 4 PDF + 1 ZIP da `input/normalized/`, scrive in `output/`
+- `POST /cleanup` — elimina i job in stato `done`/`error` più vecchi di `older_than_days`
 
-Request body (JSON): `{ "job_id": "...", "chat_id": "...", "callback_url": "...", "book_title": "..." }`
+Body della richiesta (JSON): `{ "job_id": "...", "chat_id": "...", "callback_url": "...", "book_title": "..." }`
 
-On completion, `/importa` and `/confeziona` POST the `callback_url` with the result payload.
+Al termine, `/importa` e `/confeziona` fanno una POST al `callback_url` con il payload del risultato.
 
-## Job state machine
+## Macchina a stati dei job
 
 ```
-importing → validated       (cover.png present)
-          → cover_missing   (no cover.png)
+importing → validated       (cover.png presente)
+          → cover_missing   (nessuna cover.png)
 
 packaging → done
           → error
 ```
 
-## PDF output formats
+## Formati di output PDF
 
-| Variant | Canvas (px, 300 DPI) | Structure |
-|---------|----------------------|-----------|
-| `etsy_us_letter` | 2550 × 3300 | cover + pages |
-| `etsy_a4` | 2480 × 3508 | cover + pages |
-| `kdp_us_letter` | 2550 × 3300 | cover + art/blank interleaved |
-| `kdp_a4` | 2480 × 3508 | cover + art/blank interleaved |
+| Variante | Canvas (px, 300 DPI) | Struttura |
+|----------|----------------------|-----------|
+| `etsy_us_letter` | 2550 × 3300 | cover + pagine |
+| `etsy_a4` | 2480 × 3508 | cover + pagine |
+| `kdp_us_letter` | 2550 × 3300 | cover + art/blank intercalate |
+| `kdp_a4` | 2480 × 3508 | cover + art/blank intercalate |
 
-KDP variants insert a blank white page after every art page (required for physical POD to prevent bleed-through). The Etsy ZIP bundles the two Etsy PDFs.
+Le varianti KDP inseriscono una pagina bianca dopo ogni pagina d'arte (necessario per la stampa fisica POD per evitare trasparenza). Lo ZIP Etsy raggruppa i due PDF Etsy.
 
-All source images are fitted with `ImageOps.contain` onto a white RGB canvas (letterboxed, never cropped or stretched).
+Tutte le immagini sorgente vengono adattate con `ImageOps.contain` su un canvas RGB bianco (letterboxed, mai ritagliate né stirate).
 
-## Key functions in app.py
+## Funzioni principali di app.py
 
-| Function | Lines | Purpose |
-|----------|-------|---------|
-| `copy_and_normalize_pages` | ~119 | Renames raw files to `page_NN.png`, copies cover |
-| `fit_image_to_canvas` | ~156 | Letterboxes one image onto a white canvas at target size |
-| `build_render_sequence` | ~173 | Assembles the ordered list of PNGs for a given variant |
-| `generate_pdf_from_sequence` | ~217 | Converts PNG list → PDF via `img2pdf` |
-| `update_status` | ~69 | Atomic read-modify-write of `status.json` |
+| Funzione | Righe | Scopo |
+|----------|-------|-------|
+| `copy_and_normalize_pages` | ~119 | Rinomina i file raw in `page_NN.png`, copia la cover |
+| `fit_image_to_canvas` | ~156 | Letterbox di un'immagine su canvas bianco alla dimensione target |
+| `build_render_sequence` | ~173 | Assembla la lista ordinata di PNG per una data variante |
+| `generate_pdf_from_sequence` | ~217 | Converte la lista di PNG in PDF tramite `img2pdf` |
+| `update_status` | ~69 | Lettura-modifica-scrittura atomica di `status.json` |
 
-## Dependencies
+## Dipendenze
 
-- `Flask` — HTTP server
-- `Pillow` — image resizing and canvas composition
-- `img2pdf` — lossless PNG-to-PDF conversion (preserves DPI metadata)
-- `gunicorn` — production WSGI server (2 workers, 600 s timeout)
-- `ghostscript` — installed in Docker image, used indirectly by img2pdf for some formats
+- `Flask` — server HTTP
+- `Pillow` — ridimensionamento immagini e composizione del canvas
+- `img2pdf` — conversione PNG→PDF lossless (preserva i metadati DPI)
+- `gunicorn` — server WSGI per produzione (2 worker, timeout 600 s)
+- `ghostscript` — installato nell'immagine Docker, usato indirettamente da img2pdf per alcuni formati
