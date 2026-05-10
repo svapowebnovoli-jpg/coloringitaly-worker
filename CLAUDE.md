@@ -16,6 +16,36 @@ Il progetto produce **coloring book per adulti a tema italiano** venduti sul neg
 - Endpoint `/genera_cover` — generazione automatica della copertina
 - Pipeline clipart — gestione e assemblaggio di elementi grafici riutilizzabili
 
+## Comportamenti automatici / Automatic behaviors
+
+**IT** — Regole che Claude Code deve seguire sempre in questo progetto:
+
+1. **Nuovo prodotto** — Ogni volta che si inizia a lavorare su un nuovo prodotto digitale, chiedere sempre: *categoria* (coloring book, clipart, planner…), *nicchia target* (es. italiani all'estero, amanti del viaggio, adulti stress-relief), *piattaforma* (Etsy, KDP, o entrambe).
+
+2. **Verifica tecnica preventiva** — Prima di generare qualsiasi file, verificare sempre che rispetti i limiti tecnici della piattaforma di destinazione (DPI, peso, margini, bleed, trim size) come documentato nella sezione "Specifiche tecniche Etsy e KDP".
+
+3. **Suggerimenti post-prodotto** — Dopo ogni prodotto completato, suggerire sempre 3 varianti o prodotti correlati da creare (es. tema diverso, formato diverso, versione bundle).
+
+4. **Bundle e cross-selling** — Se si individua un'opportunità di bundle (es. più coloring book insieme) o cross-selling (es. clipart abbinata al coloring book), segnalarla sempre esplicitamente.
+
+5. **Pricing** — Proporre sempre un pricing di riferimento basato sulla categoria e sulla piattaforma, con range basso/medio/alto.
+
+---
+
+**EN** — Rules Claude Code must always follow in this project:
+
+1. **New product** — Whenever starting work on a new digital product, always ask: *category* (coloring book, clipart, planner…), *target niche* (e.g. Italians abroad, travel lovers, adult stress-relief), *platform* (Etsy, KDP, or both).
+
+2. **Pre-generation technical check** — Before generating any file, always verify it meets the platform's technical requirements (DPI, file size, margins, bleed, trim size) as documented in the "Specifiche tecniche Etsy e KDP" section.
+
+3. **Post-product suggestions** — After every completed product, always suggest 3 variants or related products to create (e.g. different theme, different format, bundle version).
+
+4. **Bundle and cross-selling** — If a bundle opportunity (e.g. multiple coloring books together) or cross-selling opportunity (e.g. matching clipart) is spotted, always flag it explicitly.
+
+5. **Pricing** — Always suggest a reference pricing based on category and platform, with low/mid/high range.
+
+---
+
 ## Specifiche tecniche Etsy e KDP
 
 ### Etsy — file digitali
