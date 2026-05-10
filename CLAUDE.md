@@ -16,6 +16,217 @@ Il progetto produce **coloring book per adulti a tema italiano** venduti sul neg
 - Endpoint `/genera_cover` — generazione automatica della copertina
 - Pipeline clipart — gestione e assemblaggio di elementi grafici riutilizzabili
 
+## Expertise Prodotti Digitali / Digital Products Expertise
+
+---
+
+### 1. Coloring Book Adulti
+
+**IT — Specifiche tecniche:**
+- Interior PDF: 300 DPI, trim size US Letter (8,5"×11") o A4, carta bianca (white, non cream), pagina bianca dopo ogni disegno
+- Cover PDF: 300 DPI, full wrap con bleed 0,125" su tutti i lati
+- Etsy digitale: max 20 MB per file, consegnare PDF+ZIP
+- KDP: 24–828 pagine, max 650 MB interior
+
+**IT — Nicchie top 2025:**
+- Italia/viaggio/monumenti (la nostra nicchia attuale — alta domanda, bassa concorrenza italiana)
+- Botanica/fiori/giardini vintage
+- Mindfulness/mandala/zen
+- Dark academia e gothic
+- Cottagecore/funghi/natura
+- Architettura line art (Roma, Venezia, Firenze)
+
+**IT — Pricing strategy:**
+- Etsy digitale singolo: €3–8
+- Etsy bundle (2–3 libri): €8–15
+- KDP fisico: €12–25 (royalty ~35%)
+- Bundle Etsy US Letter + A4: €10–12
+
+**IT — Automazione con AI:**
+- Generazione disegni: Midjourney (stile line art, no fill, white background), Stable Diffusion
+- Post-processing: conversione in B&W puro, rimozione grigi medi, upscaling a 300 DPI
+- Cover: Canva + immagine AI + font serif elegante
+- Descrizioni listing: Claude/GPT con keyword research Etsy integrata
+
+---
+
+**EN — Technical specs:** 300 DPI PDF interior (US Letter or A4), white paper, blank page after every art page, cover PDF full wrap with 0.125" bleed, Etsy max 20 MB.
+
+**EN — Top 2025 niches:** Italy/travel/landmarks, botanical vintage, mindfulness/mandala, dark academia, cottagecore, architecture line art.
+
+**EN — Pricing:** Etsy digital €3–8 single / €8–15 bundle; KDP print €12–25.
+
+**EN — AI automation:** Midjourney line art → B&W post-processing → 300 DPI upscale → Canva cover → Claude listing copy.
+
+---
+
+### 2. Clipart SVG
+
+**IT — Specifiche tecniche:**
+- Formato principale: SVG vettoriale (scalabile infinitamente)
+- Formato alternativo: PNG 300 DPI, sfondo trasparente, min 3000×3000 px per elemento singolo
+- Consegna: ZIP con SVG + PNG (conta come 1 file su Etsy)
+- Etsy: max 20 MB per file (5 file per listing) — per bundle grandi usare un unico ZIP
+- Spazio colore: sRGB, no profili CMYK incorporati
+
+**IT — Nicchie top 2025:**
+- Italiana/mediterranea (limoni, ceramiche, architettura)
+- Botanical vintage e illustrazione scientifica
+- Halloween/witchy/dark floral
+- Wedding/boho/eucalipto
+- Elementi per digital planner (icone, sticker, washi tape)
+- Sport e hobby specifici (ciclismo, cucina, gatto)
+
+**IT — Pricing strategy:**
+- Elemento singolo: €2–4
+- Pack 10–20 elementi: €5–12
+- Mega bundle 50+: €15–30
+- Licenza commerciale (uso su prodotti in vendita): +50–100%
+
+**IT — Automazione con AI:**
+- Generazione: Midjourney con stile coerente su un unico prompt-template
+- Vettorizzazione: Adobe Illustrator Live Trace, Vectorizer.ai, Inkscape auto-trace
+- Rimozione sfondo: Remove.bg, Canva BG Remover
+- Batch export: Illustrator scripting o Inkscape CLI
+
+---
+
+**EN — Technical specs:** SVG + transparent-background PNG (min 3000×3000 px, 300 DPI), delivered as ZIP. Etsy max 20 MB per file.
+
+**EN — Top 2025 niches:** Italian/Mediterranean, botanical vintage, Halloween/witchy, wedding/boho, digital planner elements, niche hobbies.
+
+**EN — Pricing:** Single €2–4 / pack €5–12 / mega bundle €15–30 / commercial license +50%.
+
+**EN — AI automation:** Midjourney consistent style → Vectorizer.ai → batch export SVG+PNG → ZIP delivery.
+
+---
+
+### 3. Wall Art (Stampe Decorative)
+
+**IT — Specifiche tecniche:**
+- Formato: PDF o JPG/PNG alta risoluzione
+- DPI: 300 minimo; 350–600 per stampe large format (poster 18"×24"+)
+- Dimensioni standard da includere in bundle: 5×7", 8×10", 11×14", A4, A3, 18×24"
+- Spazio colore: sRGB per Etsy digitale
+- Consegna: ZIP con tutti i formati (conta come 1 file Etsy)
+- Etsy: max 20 MB per ZIP — comprimere PNG con tinypng.com se necessario
+
+**IT — Nicchie top 2025:**
+- Citazioni motivazionali bilingue italiano/inglese
+- Botanical prints in stile vintage/erbario
+- Astronomia, costellazioni, mappe stellari
+- Minimalismo scandinavo (line art di città)
+- Architecture line art italiana (skyline di Roma, Venezia, Firenze)
+- Nursery/cameretta bambini con illustrazioni morbide
+
+**IT — Pricing strategy:**
+- Print singola: €2–6
+- Set coordinato 3–5 stampe: €6–15
+- Bundle multiformat (tutti i formati in un ZIP): €8–20
+- Collezione tematica 10+: €15–30
+
+**IT — Automazione con AI:**
+- Design base: Midjourney + upscaling con Magnific o Topaz
+- Testo e layout: Canva con font pairing automatizzato
+- Resize batch: Python (Pillow) o Photoshop Actions per generare tutti i formati
+- Mockup automatici: Placeit API, Creative Fabrica
+
+---
+
+**EN — Technical specs:** 300+ DPI PDF/JPG/PNG, sRGB, standard sizes (5×7" to 18×24"), delivered as ZIP under 20 MB.
+
+**EN — Top 2025 niches:** Bilingual motivational quotes, botanical vintage, astronomy/star maps, Scandinavian minimalism, Italian architecture line art, nursery prints.
+
+**EN — Pricing:** Single €2–6 / set €6–15 / multi-format bundle €8–20.
+
+**EN — AI automation:** Midjourney → Topaz upscaling → Python batch resize all formats → ZIP delivery.
+
+---
+
+### 4. Template Canva
+
+**IT — Specifiche tecniche:**
+- Formato consegnato: PDF preview (A4 o dimensione originale) + file TXT/PDF con link al template Canva condivisibile
+- Etsy non supporta link diretti come file scaricabile: il link va incorporato in un PDF di istruzioni
+- Il template Canva deve essere impostato come "usa template" (non modifica il file originale)
+- Dimensioni per tipo: social 1080×1080 px, Story 1080×1920 px, A4 per stampa, Presentation 1920×1080 px
+- Font: usare solo font gratuiti di Canva o caricare font free-license per evitare problemi legali
+
+**IT — Nicchie top 2025:**
+- Social media kit per piccole imprese e artigiani italiani
+- Wedding invitation e stationery (inviti, menu, segnaposto)
+- Digital planner 2025–2026 (GoodNotes, Notability)
+- Presentation template per freelance e coach
+- Resume/CV moderno bilingue
+
+**IT — Pricing strategy:**
+- Template singolo: €3–8
+- Pack 5–10 template coordinati: €10–25
+- Brand kit completo (logo placeholder + 20 template): €30–60
+- Social media bundle mensile: €8–15
+
+**IT — Automazione con AI:**
+- Generazione varianti colore: Canva Brand Kit + sostituzione palette
+- Copy e testo di esempio: Claude/GPT per placeholder realistici
+- Preview mockup: screenshot Canva + mockup dispositivo su Placeit
+- Traduzione IT/EN automatica dei testi nei template
+
+---
+
+**EN — Technical specs:** Deliver as PDF preview + PDF/TXT with Canva template link. Template must be set to "use template" mode. Use only free Canva fonts.
+
+**EN — Top 2025 niches:** Italian small business social kits, wedding stationery, digital planners, freelance presentations, bilingual CVs.
+
+**EN — Pricing:** Single €3–8 / pack €10–25 / brand kit €30–60.
+
+**EN — AI automation:** Canva Brand Kit color variants → Claude copy → Placeit mockups.
+
+---
+
+### 5. Puzzle Books KDP
+
+**IT — Specifiche tecniche:**
+- Interior: PDF, 300 DPI, bianco/nero (massimizza royalty KDP)
+- Trim size consigliati: 6"×9" (tascabile), 8"×10", 8,5"×11" (large print)
+- Carta: white (non cream) per B&W
+- Pagine minime: 24 — massime: 828
+- Ogni sezione puzzle deve avere la soluzione (in appendice o pagina seguente)
+- Cover: PDF full wrap, 300 DPI, bleed 0,125"
+- Max file interior KDP: 650 MB
+
+**IT — Nicchie top 2025:**
+- Word search a tema italiano (cibo, città, storia, calcio)
+- Sudoku brandizzato (copertina tematica, difficoltà graduata)
+- Crossword puzzle bilingue italiano/inglese
+- Libri di attività per anziani (large print, caratteri grandi)
+- Mazes/labirinti tematici (architettura, natura)
+- Crypto puzzles e logic puzzles per adulti
+
+**IT — Pricing strategy:**
+- KDP fisico: €8–18 (royalty ~35% sul prezzo di listino)
+- Etsy PDF digitale: €3–7
+- Large print edition (anziani): premium +20–30%
+- Bundle KDP serie (es. Vol. 1 + Vol. 2): incrementa visibilità organica
+
+**IT — Automazione con AI:**
+- Word search: Python (`word-search` library) con lista parole generata da Claude
+- Sudoku: generatori open source con livelli di difficoltà (easy/medium/hard/expert)
+- Crossword: `crossword` Python library o Crossword Labs export
+- Layout e impaginazione: Python `reportlab` o `WeasyPrint` per PDF automatico
+- Copertina: Midjourney + Canva template + KDP cover calculator per dimensioni dorso
+
+---
+
+**EN — Technical specs:** B&W PDF interior, 300 DPI, white paper, 6×9"/8×10"/8.5×11" trim, 24–828 pages, solution section required, cover full wrap PDF with 0.125" bleed.
+
+**EN — Top 2025 niches:** Italian-themed word search, branded sudoku, bilingual crossword, large-print for seniors, themed mazes, logic/crypto puzzles.
+
+**EN — Pricing:** KDP print €8–18 / Etsy digital €3–7 / large print +20–30% premium.
+
+**EN — AI automation:** Claude word lists → Python puzzle generators → reportlab PDF layout → Midjourney cover → KDP cover calculator.
+
+---
+
 ## Comportamenti automatici / Automatic behaviors
 
 **IT** — Regole che Claude Code deve seguire sempre in questo progetto:
