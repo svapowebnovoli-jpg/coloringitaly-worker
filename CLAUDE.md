@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Preferenze di collaborazione
+
+- Rispondere sempre **prima in italiano, poi in inglese** nella stessa risposta.
+
 ## Contesto strategico
 
 Il progetto produce **coloring book per adulti a tema italiano** venduti sul negozio Etsy **BagarreBazaar**, sezione **Ink & Roads**.
