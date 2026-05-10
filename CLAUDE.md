@@ -12,7 +12,7 @@ Il progetto produce **coloring book per adulti a tema italiano** venduti sul neg
 - Endpoint `/genera_cover` — generazione automatica della copertina
 - Pipeline clipart — gestione e assemblaggio di elementi grafici riutilizzabili
 
-## What this is
+## Cos'è questo servizio
 
 A single-file Flask REST API that normalizes coloring-book images and assembles them into print-ready PDFs. The entire application is `app.py`. It runs as a Docker container and is called by n8n in response to Telegram bot commands.
 
