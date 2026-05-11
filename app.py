@@ -12,7 +12,7 @@ import img2pdf
 import subprocess
 import zipfile
 from flask import Flask, request, jsonify
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, ImageDraw, ImageFont
 
 app = Flask(__name__)
 
@@ -26,6 +26,15 @@ TMP_RETENTION_DAYS = int(os.getenv("TMP_RETENTION_DAYS", "14"))
 
 US_LETTER = (2550, 3300)
 A4 = (2480, 3508)
+
+TEMPLATES_ROOT = Path(os.getenv("TEMPLATES_ROOT", "/srv/coloringitaly/templates"))
+OVAL_X = int(os.getenv("OVAL_X", "500"))
+OVAL_Y = int(os.getenv("OVAL_Y", "300"))
+OVAL_W = int(os.getenv("OVAL_W", "1550"))
+OVAL_H = int(os.getenv("OVAL_H", "1800"))
+COVER_FONT_SIZE  = int(os.getenv("COVER_FONT_SIZE", "100"))
+BRAND_FONT_SIZE  = int(os.getenv("BRAND_FONT_SIZE", "55"))
+COVER_FONT_PATH  = os.getenv("COVER_FONT_PATH", str(TEMPLATES_ROOT / "fonts" / "cover-title.ttf"))
 
 
 def ensure_job_dirs(job_id: str):
@@ -237,6 +246,54 @@ def callback(callback_url: str | None, payload: dict):
         pass
 
 
+def generate_cover(template_path: Path, artwork_path: Path, book_title: str, brand_name: str = "Ink & Roads") -> Image.Image:
+    template = Image.open(template_path).convert("RGBA")
+    canvas_w, canvas_h = template.size
+    oval_box = (OVAL_X, OVAL_Y, OVAL_X + OVAL_W, OVAL_Y + OVAL_H)
+
+    # Ellipse mask for the artwork area
+    mask = Image.new("L", (canvas_w, canvas_h), 0)
+    ImageDraw.Draw(mask).ellipse(oval_box, fill=255)
+
+    # Artwork resized to fit oval bounding box (letterbox)
+    with Image.open(artwork_path).convert("RGBA") as art:
+        art_resized = ImageOps.contain(art, (OVAL_W, OVAL_H))
+
+    # Place artwork centred inside the oval on a white canvas
+    artwork_layer = Image.new("RGBA", (canvas_w, canvas_h), (255, 255, 255, 255))
+    x_off = OVAL_X + (OVAL_W - art_resized.size[0]) // 2
+    y_off = OVAL_Y + (OVAL_H - art_resized.size[1]) // 2
+    artwork_layer.paste(art_resized, (x_off, y_off))
+
+    # Composite: white → artwork clipped to oval → template on top
+    result = Image.new("RGBA", (canvas_w, canvas_h), (255, 255, 255, 255))
+    result.paste(artwork_layer, (0, 0), mask)
+    result = Image.alpha_composite(result, template)
+
+    # Text rendering
+    draw = ImageDraw.Draw(result)
+    try:
+        font_title = ImageFont.truetype(COVER_FONT_PATH, COVER_FONT_SIZE)
+        font_brand = ImageFont.truetype(COVER_FONT_PATH, BRAND_FONT_SIZE)
+    except (IOError, OSError):
+        font_title = ImageFont.load_default()
+        font_brand = ImageFont.load_default()
+
+    # Title centred below oval
+    text_y = OVAL_Y + OVAL_H + 80
+    title_bbox = draw.textbbox((0, 0), book_title, font=font_title)
+    title_w = title_bbox[2] - title_bbox[0]
+    draw.text(((canvas_w - title_w) // 2, text_y), book_title, fill=(0, 0, 0), font=font_title)
+
+    # Brand name below title
+    brand_y = text_y + COVER_FONT_SIZE + 20
+    brand_bbox = draw.textbbox((0, 0), brand_name, font=font_brand)
+    brand_w = brand_bbox[2] - brand_bbox[0]
+    draw.text(((canvas_w - brand_w) // 2, brand_y), brand_name, fill=(0, 0, 0), font=font_brand)
+
+    return result.convert("RGB")
+
+
 @app.get("/health")
 def health():
     JOBS_ROOT.mkdir(parents=True, exist_ok=True)
@@ -305,6 +362,56 @@ def importa():
         }
         callback(callback_url, payload)
         return jsonify({"ok": True, **save})
+    except Exception as e:
+        err = update_status(job_id, status="error", error=str(e), chat_id=chat_id)
+        log_event(job_id, traceback.format_exc())
+        callback(callback_url, {"status": "error", "job_id": job_id, "chat_id": chat_id, "error": str(e)})
+        return jsonify({"ok": False, **err}), 500
+
+
+@app.post("/genera_cover")
+@require_auth
+def genera_cover():
+    body = request.get_json(force=True, silent=True) or {}
+    job_id       = str(body.get("job_id", "")).strip()
+    callback_url = body.get("callback_url")
+    chat_id      = str(body.get("chat_id", "")).strip()
+    book_title   = str(body.get("book_title", "")).strip()
+
+    if not job_id:
+        return jsonify({"ok": False, "error": "job_id mancante"}), 400
+    if not book_title:
+        return jsonify({"ok": False, "error": "book_title mancante"}), 400
+
+    try:
+        dirs          = ensure_job_dirs(job_id)
+        template_path = TEMPLATES_ROOT / "cover_template.png"
+        artwork_path  = dirs["normalized"] / "cover.png"
+
+        if not template_path.exists():
+            raise FileNotFoundError(f"Template non trovato: {template_path}")
+        if not artwork_path.exists():
+            raise FileNotFoundError("cover.png non trovato in input/normalized — esegui prima /importa")
+
+        update_status(job_id, status="cover_generating", chat_id=chat_id)
+        log_event(job_id, "/genera_cover avviato")
+
+        cover_img = generate_cover(template_path, artwork_path, book_title)
+        out_path  = dirs["output"] / "cover_final.png"
+        cover_img.save(out_path, format="PNG", dpi=(300, 300))
+
+        size_str = format_size(out_path.stat().st_size)
+        final = update_status(
+            job_id, status="cover_ready", chat_id=chat_id,
+            book_title=book_title, cover_final=out_path.name,
+            cover_size=size_str, error="",
+        )
+        log_event(job_id, f"/genera_cover completato → {out_path.name} ({size_str})")
+        callback(callback_url, {
+            "status": "cover_ready", "job_id": job_id, "chat_id": chat_id,
+            "book_title": book_title, "cover_file": out_path.name, "cover_size": size_str,
+        })
+        return jsonify({"ok": True, **final})
     except Exception as e:
         err = update_status(job_id, status="error", error=str(e), chat_id=chat_id)
         log_event(job_id, traceback.format_exc())
