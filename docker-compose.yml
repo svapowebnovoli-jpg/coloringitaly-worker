@@ -1,0 +1,20 @@
+services:
+  coloringitaly-worker:
+    build: .
+    container_name: coloringitaly-worker
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - /srv/coloringitaly:/srv/coloringitaly
+    networks:
+      default:
+      ci-shared:
+        aliases:
+          - coloringitaly-worker
+
+networks:
+  ci-shared:
+    external: true

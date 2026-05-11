@@ -13,6 +13,7 @@ import subprocess
 import zipfile
 from flask import Flask, request, jsonify
 from PIL import Image, ImageOps, ImageDraw, ImageFont
+from PyPDF2 import PdfWriter
 
 app = Flask(__name__)
 
@@ -151,8 +152,12 @@ def copy_and_normalize_pages(job_id: str):
         shutil.copy2(src, dst)
         normalized_names.append(dst.name)
 
+    job_info = parse_job_id(job_id)
     manifest = {
         "job_id": job_id,
+        "country": job_info["country"],
+        "theme": job_info["theme"],
+        "collection": f"{job_info['country']}_{job_info['theme']}",
         "pages_found": len(pages),
         "cover_present": cover_present,
         "raw_files": [p.name for p in pages],
@@ -246,32 +251,82 @@ def callback(callback_url: str | None, payload: dict):
         pass
 
 
+def parse_job_id(job_id: str) -> dict:
+    parts = job_id.split("_")
+    if len(parts) >= 3:
+        country = parts[0]
+        theme = parts[1]
+        seq = "_".join(parts[2:])
+    else:
+        country = "unknown"
+        theme = "unknown"
+        seq = job_id
+    return {"country": country, "theme": theme, "seq": seq}
+
+
+def add_pdf_metadata(pdf_path: Path, book_title: str, country: str = "", theme: str = ""):
+    try:
+        writer = PdfWriter()
+        with open(pdf_path, "rb") as f:
+            reader_pages = __import__("PyPDF2").PdfReader(f)
+            for page in reader_pages.pages:
+                writer.add_page(page)
+
+        writer.add_metadata({
+            "/Title": book_title,
+            "/Author": "Ink & Roads",
+            "/Subject": f"{country} {theme}".strip() or "Coloring Book",
+            "/Creator": "coloringitaly-worker",
+        })
+
+        with open(pdf_path, "wb") as f:
+            writer.write(f)
+    except Exception:
+        pass
+
+
 def generate_cover(template_path: Path, artwork_path: Path, book_title: str, brand_name: str = "Ink & Roads") -> Image.Image:
-    template = Image.open(template_path).convert("RGBA")
+    # Open template as the base background (RGB — no alpha channel in the PNG).
+    template = Image.open(template_path).convert("RGB")
     canvas_w, canvas_h = template.size
+
     oval_box = (OVAL_X, OVAL_Y, OVAL_X + OVAL_W, OVAL_Y + OVAL_H)
 
-    # Ellipse mask for the artwork area
+    # Bug 3 fix: load artwork fully into memory before closing the file handle,
+    # so the lazy-loaded pixel data is available outside the context manager.
+    with Image.open(artwork_path) as art_file:
+        art_rgba = art_file.convert("RGBA")
+        art_rgba.load()  # force complete pixel decode while file is still open
+    art_resized = ImageOps.contain(art_rgba, (OVAL_W, OVAL_H))
+
+    # Build an ellipse mask the same size as the canvas (white = show artwork).
     mask = Image.new("L", (canvas_w, canvas_h), 0)
     ImageDraw.Draw(mask).ellipse(oval_box, fill=255)
 
-    # Artwork resized to fit oval bounding box (letterbox)
-    with Image.open(artwork_path).convert("RGBA") as art:
-        art_resized = ImageOps.contain(art, (OVAL_W, OVAL_H))
-
-    # Place artwork centred inside the oval on a white canvas
-    artwork_layer = Image.new("RGBA", (canvas_w, canvas_h), (255, 255, 255, 255))
+    # Start from the template as background, then paste the artwork through the
+    # ellipse mask so only the oval area reveals the artwork.
+    # Bug 3 cont.: paste artwork ON TOP of the template (not under it), using the
+    # ellipse mask — this replaces the original oval content with our artwork.
+    result = template.copy().convert("RGBA")
     x_off = OVAL_X + (OVAL_W - art_resized.size[0]) // 2
     y_off = OVAL_Y + (OVAL_H - art_resized.size[1]) // 2
-    artwork_layer.paste(art_resized, (x_off, y_off))
 
-    # Composite: white → artwork clipped to oval → template on top
-    result = Image.new("RGBA", (canvas_w, canvas_h), (255, 255, 255, 255))
-    result.paste(artwork_layer, (0, 0), mask)
-    result = Image.alpha_composite(result, template)
+    # Temporary full-canvas layer with artwork positioned at the oval centre.
+    art_layer = Image.new("RGBA", (canvas_w, canvas_h), (255, 255, 255, 0))
+    art_layer.paste(art_resized, (x_off, y_off))
 
-    # Text rendering
+    # Composite: template background ← artwork (clipped by ellipse mask).
+    result.paste(art_layer, (0, 0), mask)
+
+    # Bug 2 fix: the template PNG has static text baked in below the oval
+    # ("ITALIAN COLLECTION", "LEGENDS", etc.).  Erase that entire band with a
+    # solid white rectangle.  We start 30 px above the exact oval bottom to
+    # catch any template text whose ascenders creep into the oval border zone.
+    oval_bottom = OVAL_Y + OVAL_H   # = 2572 with .env values
+    text_erase_top = oval_bottom - 30
     draw = ImageDraw.Draw(result)
+    draw.rectangle([(0, text_erase_top), (canvas_w, canvas_h)], fill=(255, 255, 255, 255))
+
     try:
         font_title = ImageFont.truetype(COVER_FONT_PATH, COVER_FONT_SIZE)
         font_brand = ImageFont.truetype(COVER_FONT_PATH, BRAND_FONT_SIZE)
@@ -279,17 +334,21 @@ def generate_cover(template_path: Path, artwork_path: Path, book_title: str, bra
         font_title = ImageFont.load_default()
         font_brand = ImageFont.load_default()
 
-    # Title centred below oval
-    text_y = OVAL_Y + OVAL_H + 80
-    title_bbox = draw.textbbox((0, 0), book_title, font=font_title)
-    title_w = title_bbox[2] - title_bbox[0]
-    draw.text(((canvas_w - title_w) // 2, text_y), book_title, fill=(0, 0, 0), font=font_title)
+    # Bug 1 fix: text_y is anchored strictly below the oval bottom edge.
+    # A margin of 80 px gives breathing room between the oval and the title.
+    text_y = oval_bottom + 80
 
-    # Brand name below title
-    brand_y = text_y + COVER_FONT_SIZE + 20
+    # Row 1 — collection title in uppercase.
+    title_text = book_title.upper()
+    title_bbox = draw.textbbox((0, 0), title_text, font=font_title)
+    title_w = title_bbox[2] - title_bbox[0]
+    draw.text(((canvas_w - title_w) // 2, text_y), title_text, fill=(0, 0, 0), font=font_title)
+
+    # Row 2 — brand name, smaller, just below the title.
+    brand_y = text_y + (title_bbox[3] - title_bbox[1]) + 20
     brand_bbox = draw.textbbox((0, 0), brand_name, font=font_brand)
     brand_w = brand_bbox[2] - brand_bbox[0]
-    draw.text(((canvas_w - brand_w) // 2, brand_y), brand_name, fill=(0, 0, 0), font=font_brand)
+    draw.text(((canvas_w - brand_w) // 2, brand_y), brand_name, fill=(80, 80, 80), font=font_brand)
 
     return result.convert("RGB")
 
@@ -328,11 +387,14 @@ def status():
 def importa():
     body = request.get_json(force=True, silent=True) or {}
     job_id = str(body.get("job_id", "")).strip()
+    book_title = str(body.get("book_title", "")).strip()
     callback_url = body.get("callback_url")
     chat_id = str(body.get("chat_id", "")).strip()
 
     if not job_id:
         return jsonify({"ok": False, "error": "job_id mancante"}), 400
+    if not book_title:
+        return jsonify({"ok": False, "error": "book_title mancante"}), 400
 
     try:
         dirs = ensure_job_dirs(job_id)
@@ -346,6 +408,9 @@ def importa():
             job_id,
             status=status_value,
             chat_id=chat_id,
+            book_title=book_title,
+            country=manifest["country"],
+            theme=manifest["theme"],
             pages_found=manifest["pages_found"],
             cover_present=cover_present,
             normalized_files=manifest["normalized_files"],
@@ -355,10 +420,11 @@ def importa():
             "status": status_value,
             "job_id": job_id,
             "chat_id": chat_id,
+            "book_title": book_title,
+            "country": manifest["country"],
+            "theme": manifest["theme"],
             "pages_found": manifest["pages_found"],
             "cover_present": cover_present,
-            "pages_generated": manifest["pages_found"],
-            "book_title": body.get("book_title", "ColoringItaly")
         }
         callback(callback_url, payload)
         return jsonify({"ok": True, **save})
@@ -424,12 +490,14 @@ def genera_cover():
 def confeziona():
     body = request.get_json(force=True, silent=True) or {}
     job_id = str(body.get("job_id", "")).strip()
+    book_title = str(body.get("book_title", "")).strip()
     callback_url = body.get("callback_url")
     chat_id = str(body.get("chat_id", "")).strip()
-    book_title = body.get("book_title", "ColoringItaly")
 
     if not job_id:
         return jsonify({"ok": False, "error": "job_id mancante"}), 400
+    if not book_title:
+        return jsonify({"ok": False, "error": "book_title mancante"}), 400
 
     try:
         dirs = ensure_job_dirs(job_id)
@@ -442,7 +510,12 @@ def confeziona():
         if not cover.exists():
             raise FileNotFoundError("cover.png mancante. Carica la cover e rilancia /importa.")
 
-        update_status(job_id, status="packaging", chat_id=chat_id, book_title=book_title)
+        job_info = parse_job_id(job_id)
+        country = job_info["country"]
+        theme = job_info["theme"]
+        filename_prefix = f"{job_id}"
+
+        update_status(job_id, status="packaging", chat_id=chat_id, book_title=book_title, country=country, theme=theme)
         log_event(job_id, "/confeziona avviato")
 
         variants = {
@@ -454,32 +527,46 @@ def confeziona():
         files = {}
         for variant, page_size in variants.items():
             seq = build_render_sequence(job_id, variant, page_size)
-            pdf_path = dirs["output"] / f"coloring_book_{variant}.pdf"
+            pdf_path = dirs["output"] / f"{filename_prefix}_{variant}.pdf"
             generate_pdf_from_sequence(seq, pdf_path)
+            add_pdf_metadata(pdf_path, book_title, country, theme)
             files[pdf_path.name] = format_size(pdf_path.stat().st_size)
 
         # Crea ZIP con i 2 PDF Etsy
-        zip_path = dirs["output"] / "coloring_book_etsy.zip"
+        zip_path = dirs["output"] / f"{filename_prefix}_etsy.zip"
         with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
             for variant in ["etsy_us_letter", "etsy_a4"]:
-                pdf = dirs["output"] / f"coloring_book_{variant}.pdf"
+                pdf = dirs["output"] / f"{filename_prefix}_{variant}.pdf"
                 zf.write(pdf, pdf.name)
-        files["coloring_book_etsy.zip"] = format_size(zip_path.stat().st_size)
+        files[zip_path.name] = format_size(zip_path.stat().st_size)
 
         callback(callback_url, {
             "status": "pdf_ready",
             "job_id": job_id,
             "chat_id": chat_id,
             "book_title": book_title,
+            "country": country,
+            "theme": theme,
             "files": files,
         })
 
-        final = update_status(job_id, status="done", chat_id=chat_id, book_title=book_title, outputs=files, pdf_sizes=files, error="")
+        final = update_status(
+            job_id,
+            status="done",
+            chat_id=chat_id,
+            book_title=book_title,
+            country=country,
+            theme=theme,
+            outputs=files,
+            error=""
+        )
         callback(callback_url, {
             "status": "done",
             "job_id": job_id,
             "chat_id": chat_id,
             "book_title": book_title,
+            "country": country,
+            "theme": theme,
             "pdf_sizes": files,
             "mockup_ids": {}
         })
@@ -497,8 +584,9 @@ def confeziona():
 def cleanup():
     body = request.get_json(force=True, silent=True) or {}
     older_than_days = int(body.get("older_than_days", TMP_RETENTION_DAYS))
+    cleanup_type = body.get("cleanup_type", "all")
     cutoff = time.time() - older_than_days * 86400
-    removed = []
+    removed = {"jobs": [], "tmp_dirs": [], "normalized_dirs": []}
 
     if JOBS_ROOT.exists():
         for job_dir in JOBS_ROOT.iterdir():
@@ -507,11 +595,30 @@ def cleanup():
             st = load_json(job_dir / "status.json", default={})
             status_value = st.get("status")
             mtime = job_dir.stat().st_mtime
-            if status_value in {"done", "error"} and mtime < cutoff:
-                shutil.rmtree(job_dir, ignore_errors=True)
-                removed.append(job_dir.name)
 
-    return jsonify({"ok": True, "removed": removed, "count": len(removed)})
+            if mtime < cutoff:
+                if cleanup_type in {"all", "full"} and status_value in {"done", "error"}:
+                    shutil.rmtree(job_dir, ignore_errors=True)
+                    removed["jobs"].append(job_dir.name)
+                elif cleanup_type in {"all", "refusi"}:
+                    tmp_dir = job_dir / "tmp"
+                    if tmp_dir.exists():
+                        shutil.rmtree(tmp_dir, ignore_errors=True)
+                        removed["tmp_dirs"].append(job_dir.name)
+
+                    if status_value in {"done", "error"}:
+                        norm_dir = job_dir / "input" / "normalized"
+                        if norm_dir.exists():
+                            shutil.rmtree(norm_dir, ignore_errors=True)
+                            removed["normalized_dirs"].append(job_dir.name)
+
+    total_removed = len(removed["jobs"]) + len(removed["tmp_dirs"]) + len(removed["normalized_dirs"])
+    return jsonify({
+        "ok": True,
+        "cleanup_type": cleanup_type,
+        "removed": removed,
+        "count": total_removed
+    })
 
 
 if __name__ == "__main__":
