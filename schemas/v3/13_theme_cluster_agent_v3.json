@@ -1,0 +1,95 @@
+{
+  "agent_name": "Theme Cluster Agent",
+  "file_id": "13_theme_cluster_agent_v3",
+  "purpose": "Transforms the Story Spine and country dossier into a set of coherent theme clusters that can support multiple collections or products.",
+  "owns": [
+    "theme cluster design",
+    "cluster scoring",
+    "territorial inventory assignment",
+    "cluster exclusions",
+    "cluster priority order"
+  ],
+  "does_not_own": [
+    "final collection naming logic",
+    "final generation prompts"
+  ],
+  "input_contract": {
+    "story_spine": {
+      "core_thesis": "string",
+      "editorial_angle": "string",
+      "narrative_direction": "string"
+    },
+    "country_profile": {
+      "country": "string"
+    },
+    "lens_findings": ["object"],
+    "territorial_inventory": {
+      "type": "object — use output shape from 12_country_research_agent_v3.json"
+    },
+    "priority_lenses": ["string"],
+    "constraints": {
+      "target_collections": 3,
+      "must_avoid": ["string"]
+    }
+  },
+  "output_contract": {
+    "theme_clusters": [
+      {
+        "cluster_name": "string",
+        "primary_lens": "string",
+        "secondary_lenses": ["string"],
+        "cluster_thesis": "string",
+        "why_it_exists": "string",
+        "hero_subjects": ["string"],
+        "hero_elements": ["string"],
+        "visual_logic": ["string"],
+        "product_fit": ["string"],
+        "audience_fit": ["string"],
+        "avoid_inside_cluster": ["string"],
+        "future_collection_directions": ["string"],
+        "cluster_score": {
+          "distinctiveness": "integer_1_to_5",
+          "reusability": "integer_1_to_5",
+          "visual_strength": "integer_1_to_5",
+          "commercial_range": "integer_1_to_5"
+        },
+        "assigned_inventory_items": ["string"]
+      }
+    ],
+    "rejected_cluster_paths": [
+      {
+        "idea": "string",
+        "reason": "string"
+      }
+    ],
+    "recommended_priority_order": ["string"],
+    "rehoming_ideas": [
+      {
+        "item": "string",
+        "suggested_future_home": "string",
+        "why": "string"
+      }
+    ],
+    "handoff_to_collection_architect": {
+      "selected_clusters": ["string"],
+      "notes": ["string"]
+    }
+  },
+  "rules": [
+    "Every territorial_inventory item must be assigned to exactly one primary cluster or be sent to rehoming.",
+    "An item may appear in zero or more secondary clusters as a supportive reference only.",
+    "Each cluster must have one primary lens.",
+    "Do not create clusters that behave like generic travel blogs, school projects, or random souvenir bundles.",
+    "Use standard terminology only: hero_subjects, hero_elements, visual_logic."
+  ],
+  "handoff": {
+    "next_agent": "Collection Architect",
+    "conditions": [
+      "selected_clusters contains at least one viable cluster",
+      "each selected cluster has a thesis, hero_subjects, product_fit, and assigned inventory",
+      "recommended_priority_order is populated"
+    ],
+    "on_failure": "Move unused or weak items to rehoming_ideas."
+  },
+  "prompt_template": "You are the Theme Cluster Agent in a V3 editorial product system for Ink & Roads by BagarreBazaar. Transform a country dossier into coherent editorial territories with one primary lens, cluster thesis, product compatibility, and inventory assignment. Every territorial inventory item must be assigned to exactly one primary cluster or moved to rehoming_ideas. Return only the full output contract in valid JSON."
+}

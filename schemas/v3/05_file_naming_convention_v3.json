@@ -1,0 +1,44 @@
+{
+  "schema_name": "file_naming_convention_v3",
+  "version": "3.1.0",
+  "base_pattern": "NN_component_name_v3.json",
+  "agent_pattern": "1X_agent_name_v3.json",
+  "rules": [
+    "Use lowercase snake_case only.",
+    "Prefix files with two digits for ordering.",
+    "Shared rules and manifests use 00-09.",
+    "Agent definitions use 10-19.",
+    "Protocols and extensions use 16+ when added after core agents.",
+    "Do not create alternate lite/detailed contracts as separate incompatible schemas."
+  ],
+  "recommended_names": {
+    "manifest": "00_package_manifest_v3.json",
+    "shared_rules": "01_shared_system_rules_v3.json",
+    "terminology": "02_standard_terminology_v3.json",
+    "revision_protocol": "03_revision_protocol_v3.json",
+    "quality_gate": "04_final_quality_gate_v3.json",
+    "file_naming": "05_file_naming_convention_v3.json",
+    "smoke_test_matrix": "06_smoke_test_matrix_v3.json",
+    "full_test_suite": "07_full_test_suite_v3.json",
+    "pre_release_checklist": "08_pre_release_checklist_v3.json",
+    "master": "10_master_orchestrator_v3.json",
+    "pattern": "11_pattern_validation_agent_v3.json",
+    "country": "12_country_research_agent_v3.json",
+    "theme_cluster": "13_theme_cluster_agent_v3.json",
+    "collection_architect": "14_collection_architect_v3.json",
+    "product_adapter": "15_product_adapter_v3.json",
+    "rehoming_protocol": "16_rehoming_protocol_v3.json",
+    "escalation_protocol": "17_escalation_protocol_v3.json",
+    "governance_rules": "18_governance_rules_v3.json"
+  },
+  "collection_naming_examples": [
+    "Ink & Roads — Sicily — Stone Streets",
+    "Ink & Roads — Japan — Market Routes",
+    "Ink & Roads — Portugal — Atlantic Work & Craft"
+  ],
+  "sku_title_examples": [
+    "Ink & Roads — Sicily — Stone Streets Coloring Book",
+    "Ink & Roads — Japan — Market Routes Illustrated Map",
+    "Ink & Roads — Portugal — Atlantic Work & Craft Clipart Bundle"
+  ]
+}

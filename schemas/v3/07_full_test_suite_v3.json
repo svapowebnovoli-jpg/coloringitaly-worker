@@ -1,0 +1,389 @@
+{
+  "file_name": "07_full_test_suite_v3.json",
+  "version": "3.1.0",
+  "purpose": "Full technical QA suite for the V3 package, including schema checks, cross-agent field coherence, handoff integrity, and blocker detection.",
+  "package_under_test": "bagarrebazaar_ink_and_roads_v3_repo_ready_json",
+  "references": {
+    "smoke_test_file": "06_smoke_test_matrix_v3.json",
+    "pre_release_checklist": "08_pre_release_checklist_v3.json",
+    "required_files": [
+      "00_package_manifest_v3.json",
+      "01_shared_system_rules_v3.json",
+      "02_standard_terminology_v3.json",
+      "03_revision_protocol_v3.json",
+      "04_final_quality_gate_v3.json",
+      "05_file_naming_convention_v3.json",
+      "06_smoke_test_matrix_v3.json",
+      "07_full_test_suite_v3.json",
+      "08_pre_release_checklist_v3.json",
+      "10_master_orchestrator_v3.json",
+      "11_pattern_validation_agent_v3.json",
+      "12_country_research_agent_v3.json",
+      "13_theme_cluster_agent_v3.json",
+      "14_collection_architect_v3.json",
+      "15_product_adapter_v3.json",
+      "16_rehoming_protocol_v3.json",
+      "17_escalation_protocol_v3.json",
+      "18_governance_rules_v3.json",
+      "examples/example_flow_italy_pasta_001.json"
+    ]
+  },
+  "test_groups": {
+    "schema_validation": [
+      {
+        "id": "SCH-001",
+        "file": "00_package_manifest_v3.json",
+        "required_root_keys": ["package_name", "version", "status", "purpose", "hierarchy", "files"],
+        "semantic_rules": [
+          "files array must list every package file exactly once",
+          "version must be a non-empty string"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-002",
+        "file": "01_shared_system_rules_v3.json",
+        "required_root_keys": ["schema_name", "version", "always_apply", "brand_world", "permanent_lenses", "global_quality_rules", "output_rules"],
+        "semantic_rules": [
+          "permanent_lenses must contain exactly 6 entries",
+          "brand_world.avoid must be a non-empty array"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-003",
+        "file": "02_standard_terminology_v3.json",
+        "required_root_keys": ["schema_name", "version", "mandatory", "terms", "anti_synonym_rule"],
+        "semantic_rules": [
+          "terms must contain hero_subjects, hero_elements, hero_subject_matrix, visual_grammar, visual_logic, visual_direction"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-004",
+        "file": "03_revision_protocol_v3.json",
+        "required_root_keys": ["schema_name", "version", "trigger", "protocol", "max_revision_rounds", "required_fields_on_revision", "escalation_after_second_revise"],
+        "semantic_rules": [
+          "max_revision_rounds must equal 2",
+          "required_fields_on_revision must include revision_round"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-005",
+        "file": "04_final_quality_gate_v3.json",
+        "required_root_keys": ["schema_name", "version", "owner", "rule", "checks", "failure_rule"],
+        "semantic_rules": [
+          "checks must include prompt_testability, visual_grammar_consistency, keyword_depth, bundle_role_assigned, specific_risks"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-006",
+        "file": "05_file_naming_convention_v3.json",
+        "required_root_keys": ["schema_name", "version", "base_pattern", "agent_pattern", "rules", "recommended_names"],
+        "semantic_rules": [
+          "recommended_names must contain entries for manifest, shared_rules, terminology, revision_protocol, quality_gate, master, pattern, country, theme_cluster, collection_architect, product_adapter"
+        ],
+        "severity": "critical"
+      },
+      {
+        "id": "SCH-010",
+        "file": "10_master_orchestrator_v3.json",
+        "required_root_keys": ["agent_name", "file_id", "purpose", "owns", "does_not_own", "input_contract", "output_contract", "rules", "handoff", "prompt_template"],
+        "semantic_rules": [
+          "output_contract must contain one full contract only",
+          "output_contract must include story_spine, country_decision, priority_lenses, product_family_matrix, delegation_schema, global_exclusions, validation_questions, handoff_readiness"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-011",
+        "file": "11_pattern_validation_agent_v3.json",
+        "required_root_keys": ["agent_name", "file_id", "purpose", "input_contract", "output_contract", "rules", "handoff", "prompt_template"],
+        "semantic_rules": [
+          "output_contract must include handoff_decision and recommended_adjustments",
+          "handoff must define approve_path, revise_path, reject_path"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-012",
+        "file": "12_country_research_agent_v3.json",
+        "required_root_keys": ["agent_name", "file_id", "purpose", "input_contract", "output_contract", "rules", "handoff", "prompt_template"],
+        "semantic_rules": [
+          "output_contract must include source_refs and territorial_inventory",
+          "source_refs must allow confidence",
+          "territorial_inventory items must allow needs_verification"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-013",
+        "file": "13_theme_cluster_agent_v3.json",
+        "required_root_keys": ["agent_name", "file_id", "purpose", "input_contract", "output_contract", "rules", "handoff", "prompt_template"],
+        "semantic_rules": [
+          "theme_clusters must include primary_lens, hero_subjects, hero_elements, visual_logic, assigned_inventory_items",
+          "rehoming_ideas must exist"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-014",
+        "file": "14_collection_architect_v3.json",
+        "required_root_keys": ["agent_name", "file_id", "purpose", "input_contract", "output_contract", "rules", "handoff", "prompt_template"],
+        "semantic_rules": [
+          "collection_blueprint must include visual_grammar, visual_logic, hero_subject_matrix, naming_logic",
+          "adapter_handoff_package must include prompt_notes and production_risks"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-015",
+        "file": "15_product_adapter_v3.json",
+        "required_root_keys": ["agent_name", "file_id", "purpose", "input_contract", "output_contract", "rules", "handoff", "prompt_template"],
+        "semantic_rules": [
+          "product_briefs must include prompt_package, listing_logic, quality_gate, handoff_status",
+          "rules must state Product Adapter owns the final generation prompt"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "SCH-016",
+        "file": "16_rehoming_protocol_v3.json",
+        "required_root_keys": ["schema_name", "version", "purpose", "optional", "register_shape", "merge_rule", "recommended_file_name"],
+        "semantic_rules": [
+          "register_shape must include item, suggested_by_agent, suggested_future_home, status"
+        ],
+        "severity": "critical"
+      },
+      {
+        "id": "SCH-017",
+        "file": "17_escalation_protocol_v3.json",
+        "required_root_keys": ["schema_name", "version", "purpose", "rule", "does_not_auto_block", "flag_conditions", "notification_shape"],
+        "semantic_rules": [
+          "notification_shape must include needs_human_review and review_reasons"
+        ],
+        "severity": "critical"
+      },
+      {
+        "id": "SCH-018",
+        "file": "18_governance_rules_v3.json",
+        "required_root_keys": ["schema_name", "version", "purpose", "rules"],
+        "semantic_rules": [
+          "rules must contain at least 10 entries",
+          "each rule must have rule_id, rule, enforcement, failure_mode",
+          "G1_terminology_purity must be present",
+          "G2_one_contract_per_agent must be present",
+          "G5_quality_gate_mandatory must be present",
+          "G6_prompt_ownership must be present"
+        ],
+        "severity": "critical"
+      }
+    ],
+    "cross_agent_field_coherence": [
+      {
+        "id": "COH-101",
+        "producer": "10_master_orchestrator_v3.json",
+        "consumer": "11_pattern_validation_agent_v3.json",
+        "fields": ["story_spine", "country_decision", "priority_lenses", "product_family_matrix", "global_exclusions"],
+        "check": "Consumer-required fields must exist in producer output using identical names.",
+        "severity": "blocking"
+      },
+      {
+        "id": "COH-102",
+        "producer": "11_pattern_validation_agent_v3.json",
+        "consumer": "10_master_orchestrator_v3.json",
+        "fields": ["recommended_adjustments", "red_flags", "suggested_exclusions"],
+        "check": "Revision loop fields must be consumable by Master for round 2.",
+        "severity": "blocking"
+      },
+      {
+        "id": "COH-103",
+        "producer": "12_country_research_agent_v3.json",
+        "consumer": "13_theme_cluster_agent_v3.json",
+        "fields": ["country_profile", "lens_findings", "territorial_inventory", "handoff_ready_clusters"],
+        "check": "Theme Cluster Agent must not require fields absent from the Country dossier.",
+        "severity": "blocking"
+      },
+      {
+        "id": "COH-104",
+        "producer": "13_theme_cluster_agent_v3.json",
+        "consumer": "14_collection_architect_v3.json",
+        "fields": ["cluster_name", "primary_lens", "cluster_thesis", "hero_subjects", "hero_elements", "visual_logic", "product_fit"],
+        "check": "Selected cluster shape must satisfy Collection Architect input contract.",
+        "severity": "blocking"
+      },
+      {
+        "id": "COH-105",
+        "producer": "14_collection_architect_v3.json",
+        "consumer": "15_product_adapter_v3.json",
+        "fields": ["collection_blueprint", "adapter_handoff_package"],
+        "check": "Collection blueprint and adapter package must pass through without remapping or term changes.",
+        "severity": "blocking"
+      },
+      {
+        "id": "COH-106",
+        "producer": "02_standard_terminology_v3.json",
+        "consumer": "all_agents",
+        "fields": ["hero_subjects", "hero_elements", "hero_subject_matrix", "visual_grammar", "visual_logic", "visual_direction"],
+        "check": "No agent may replace canonical terms with synonyms.",
+        "severity": "blocking"
+      }
+    ],
+    "handoff_validation": [
+      {
+        "id": "HOF-201",
+        "from": "Master Orchestrator",
+        "to": "Pattern-Validation-Agent",
+        "required_conditions": [
+          "story_spine.core_thesis present",
+          "priority_lenses length between 2 and 4 when feasible",
+          "global_exclusions non-empty",
+          "handoff_readiness.status defined"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "HOF-202",
+        "from": "Pattern-Validation-Agent",
+        "to": "Master Orchestrator or Country/Theme agents",
+        "required_conditions": [
+          "handoff_decision present",
+          "approve path uses downstream notes",
+          "revise path points to revision protocol",
+          "second revise escalates"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "HOF-203",
+        "from": "Country Research Agent",
+        "to": "Theme Cluster Agent",
+        "required_conditions": [
+          "territorial_inventory populated",
+          "source_refs present or uncertainty marked",
+          "handoff_ready_clusters non-empty"
+        ],
+        "severity": "critical"
+      },
+      {
+        "id": "HOF-204",
+        "from": "Theme Cluster Agent",
+        "to": "Collection Architect",
+        "required_conditions": [
+          "selected_clusters present",
+          "each selected cluster has thesis, hero_subjects, visual_logic, assigned_inventory_items",
+          "unassigned items are rehomed"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "HOF-205",
+        "from": "Collection Architect",
+        "to": "Product Adapter",
+        "required_conditions": [
+          "collection_blueprint.collection_thesis present",
+          "visual_grammar distinct from visual_logic",
+          "prompt_notes present",
+          "final generation prompt not yet produced"
+        ],
+        "severity": "blocking"
+      },
+      {
+        "id": "HOF-206",
+        "from": "Product Adapter",
+        "to": "production",
+        "required_conditions": [
+          "quality_gate.passed true for ready briefs",
+          "at least 5 primary keywords",
+          "bundle_role assigned",
+          "generation_prompt concrete"
+        ],
+        "severity": "blocking"
+      }
+    ],
+    "blocking_error_catalog": [
+      {
+        "code": "PKG-001",
+        "severity": "blocking",
+        "trigger": "Missing required package file",
+        "affected_files": ["all"],
+        "detection": "Manifest comparison against filesystem",
+        "remediation": "Restore missing file or regenerate package"
+      },
+      {
+        "code": "PKG-002",
+        "severity": "blocking",
+        "trigger": "Invalid JSON syntax",
+        "affected_files": ["all"],
+        "detection": "JSON parser failure",
+        "remediation": "Fix syntax and re-validate"
+      },
+      {
+        "code": "MST-001",
+        "severity": "blocking",
+        "trigger": "Master returns a simplified or alternate contract",
+        "affected_files": ["10_master_orchestrator_v3.json"],
+        "detection": "Output field diff against required contract",
+        "remediation": "Enforce single output contract only"
+      },
+      {
+        "code": "REV-001",
+        "severity": "blocking",
+        "trigger": "Revise loop has no owner or no bounded retry",
+        "affected_files": ["03_revision_protocol_v3.json", "10_master_orchestrator_v3.json", "11_pattern_validation_agent_v3.json"],
+        "detection": "Simulate revise path and count rounds",
+        "remediation": "Cap at 2 rounds and escalate"
+      },
+      {
+        "code": "CTR-001",
+        "severity": "blocking",
+        "trigger": "Country Research invents sources or URLs",
+        "affected_files": ["12_country_research_agent_v3.json"],
+        "detection": "Manual or automated URL plausibility check plus uncertainty check",
+        "remediation": "Replace with verified source_refs or mark needs_verification"
+      },
+      {
+        "code": "THM-001",
+        "severity": "blocking",
+        "trigger": "Theme Cluster leaves inventory items unassigned and not rehomed",
+        "affected_files": ["13_theme_cluster_agent_v3.json", "16_rehoming_protocol_v3.json"],
+        "detection": "Inventory-to-cluster reconciliation",
+        "remediation": "Assign each item to one primary cluster or rehoming"
+      },
+      {
+        "code": "COL-001",
+        "severity": "blocking",
+        "trigger": "Collection Architect produces final generation prompts",
+        "affected_files": ["14_collection_architect_v3.json", "15_product_adapter_v3.json"],
+        "detection": "Search for generation_prompt in Collection Architect output contract or outputs",
+        "remediation": "Move prompt generation responsibility to Product Adapter"
+      },
+      {
+        "code": "PAD-001",
+        "severity": "blocking",
+        "trigger": "Product Adapter marks brief ready without quality gate passing",
+        "affected_files": ["15_product_adapter_v3.json", "04_final_quality_gate_v3.json"],
+        "detection": "Check handoff_status against quality_gate.passed",
+        "remediation": "Require quality gate pass before ready"
+      },
+      {
+        "code": "QGT-001",
+        "severity": "blocking",
+        "trigger": "Primary keywords fewer than 5 or bundle role missing in ready brief",
+        "affected_files": ["15_product_adapter_v3.json"],
+        "detection": "Ready brief field count check",
+        "remediation": "Complete listing logic before release"
+      }
+    ],
+    "minimum_pre_release_run_order": [
+      "schema_validation",
+      "cross_agent_field_coherence",
+      "handoff_validation",
+      "smoke_test_matrix execution (06_smoke_test_matrix_v3.json)",
+      "pre_release_checklist sign-off (08_pre_release_checklist_v3.json)",
+      "release sign-off"
+    ]
+  }
+}

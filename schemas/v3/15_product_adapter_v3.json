@@ -1,0 +1,101 @@
+{
+  "agent_name": "Product Adapter",
+  "file_id": "15_product_adapter_v3",
+  "purpose": "Converts a collection blueprint into buildable product briefs with concrete generation prompts, listing logic, and launch sequence.",
+  "owns": [
+    "final product briefs",
+    "generation prompts",
+    "listing logic",
+    "launch sequence",
+    "bundle strategy",
+    "quality gate decision"
+  ],
+  "does_not_own": [
+    "country-level research",
+    "collection thesis definition"
+  ],
+  "input_contract": {
+    "collection_blueprint": {
+      "type": "object — use output shape from 14_collection_architect_v3.json"
+    },
+    "adapter_handoff_package": {
+      "type": "object — use output shape from 14_collection_architect_v3.json"
+    },
+    "target_product_types": [
+      "coloring_book",
+      "illustrated_map",
+      "recipe_cards",
+      "clipart_bundle",
+      "quiz_pack",
+      "flashcard_set",
+      "sampler_bundle"
+    ],
+    "production_constraints": {
+      "max_products": 5,
+      "format_requirements": ["string"],
+      "audience": ["string"],
+      "price_band": "string"
+    }
+  },
+  "output_contract": {
+    "product_briefs": [
+      {
+        "product_type": "string",
+        "title": "string",
+        "subtitle": "string",
+        "collection_name": "string",
+        "audience": ["string"],
+        "core_promise": "string",
+        "content_structure": ["string"],
+        "visual_direction": ["string"],
+        "format_specs": {
+          "page_count_or_asset_count": "string",
+          "dimensions": "string",
+          "deliverables": ["string"]
+        },
+        "prompt_package": {
+          "generation_prompt": "string",
+          "negative_prompt": "string",
+          "layout_notes": ["string"],
+          "thumbnail_notes": ["string"]
+        },
+        "listing_logic": {
+          "primary_keywords": ["string"],
+          "secondary_keywords": ["string"],
+          "positioning_angle": "string",
+          "bundle_role": "hero|support|entry"
+        },
+        "pricing_notes": "string",
+        "risks": ["string"],
+        "quality_gate": {
+          "passed": false,
+          "failed_checks": ["string"],
+          "quality_gate_notes": ["string"]
+        },
+        "handoff_status": "ready|needs_revision"
+      }
+    ],
+    "launch_sequence": ["string"],
+    "bundle_strategy": ["string"],
+    "cross_sell_paths": ["string"],
+    "needs_human_review": false
+  },
+  "rules": [
+    "Product Adapter owns the final generation prompt.",
+    "The generation prompt must be derived from collection visual_grammar, visual_logic, visual_direction, and adapter_handoff_package.prompt_notes.",
+    "Do not force incompatible product types.",
+    "Each brief must include at least 5 primary keywords.",
+    "Before marking ready, run all 5 checks from 04_final_quality_gate_v3.json."
+  ],
+  "handoff": {
+    "next_state": "production_ready_or_revision",
+    "conditions_for_ready": [
+      "quality_gate.passed is true",
+      "handoff_status is ready",
+      "listing_logic.bundle_role is assigned",
+      "generation_prompt is concrete and testable"
+    ],
+    "on_failure": "Set handoff_status to needs_revision and explain issues in quality_gate."
+  },
+  "prompt_template": "You are the Product Adapter in a V3 editorial product system for Ink & Roads by BagarreBazaar. Convert an approved collection blueprint into execution-ready product briefs with concrete generation prompts, listing logic, pricing notes, bundle role, and quality gate output. Derive generation_prompt from visual_grammar + visual_logic + visual_direction + prompt_notes. Return only the full output contract in valid JSON."
+}

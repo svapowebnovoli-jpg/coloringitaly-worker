@@ -1,0 +1,242 @@
+{
+  "file_name": "08_pre_release_checklist_v3.json",
+  "version": "3.1.0",
+  "purpose": "Operational pre-release checklist for the V3 package, ordered by priority and ready for team assignment.",
+  "priorities": [
+    {
+      "priority": "blocking",
+      "items": [
+        {
+          "id": "PR-B01",
+          "control": "All package files exist and parse as valid JSON",
+          "owner": "QA Engineer",
+          "verification_method": "Filesystem inventory + JSON parser run over all files",
+          "acceptance_criteria": "0 missing files, 0 parse errors",
+          "related_files": [
+            "00_package_manifest_v3.json",
+            "01_shared_system_rules_v3.json",
+            "02_standard_terminology_v3.json",
+            "03_revision_protocol_v3.json",
+            "04_final_quality_gate_v3.json",
+            "05_file_naming_convention_v3.json",
+            "06_smoke_test_matrix_v3.json",
+            "07_full_test_suite_v3.json",
+            "08_pre_release_checklist_v3.json",
+            "10_master_orchestrator_v3.json",
+            "11_pattern_validation_agent_v3.json",
+            "12_country_research_agent_v3.json",
+            "13_theme_cluster_agent_v3.json",
+            "14_collection_architect_v3.json",
+            "15_product_adapter_v3.json",
+            "16_rehoming_protocol_v3.json",
+            "17_escalation_protocol_v3.json",
+            "18_governance_rules_v3.json"
+          ]
+        },
+        {
+          "id": "PR-B02",
+          "control": "Manifest matches actual package contents",
+          "owner": "Release Manager",
+          "verification_method": "Compare 00_package_manifest_v3.json files array with actual directory listing",
+          "acceptance_criteria": "Exact match, no missing or undocumented files",
+          "related_files": [
+            "00_package_manifest_v3.json"
+          ]
+        },
+        {
+          "id": "PR-B03",
+          "control": "Master Orchestrator exposes one single full output contract",
+          "owner": "Prompt Architect",
+          "verification_method": "Contract diff against 10_master_orchestrator_v3.json output_contract",
+          "acceptance_criteria": "No simplified or alternate contract exists",
+          "related_files": [
+            "10_master_orchestrator_v3.json"
+          ]
+        },
+        {
+          "id": "PR-B04",
+          "control": "Revision loop is bounded and escalates after second revise",
+          "owner": "Workflow Engineer",
+          "verification_method": "Run SMK-12 revise simulation",
+          "acceptance_criteria": "At most 2 automated rounds, then needs_human_review=true",
+          "related_files": [
+            "03_revision_protocol_v3.json",
+            "10_master_orchestrator_v3.json",
+            "11_pattern_validation_agent_v3.json"
+          ]
+        },
+        {
+          "id": "PR-B05",
+          "control": "Canonical terminology is consistent across all agents",
+          "owner": "QA Lead",
+          "verification_method": "Static grep or schema check for hero_subjects, hero_elements, hero_subject_matrix, visual_grammar, visual_logic, visual_direction",
+          "acceptance_criteria": "No forbidden synonyms found in agent contracts",
+          "related_files": [
+            "02_standard_terminology_v3.json",
+            "10_master_orchestrator_v3.json",
+            "11_pattern_validation_agent_v3.json",
+            "12_country_research_agent_v3.json",
+            "13_theme_cluster_agent_v3.json",
+            "14_collection_architect_v3.json",
+            "15_product_adapter_v3.json"
+          ]
+        },
+        {
+          "id": "PR-B06",
+          "control": "Collection Architect does not own final generation prompts",
+          "owner": "Prompt Architect",
+          "verification_method": "Search Collection Architect contract and test outputs for generation_prompt",
+          "acceptance_criteria": "No final generation prompt is produced by Collection Architect",
+          "related_files": [
+            "14_collection_architect_v3.json",
+            "15_product_adapter_v3.json"
+          ]
+        },
+        {
+          "id": "PR-B07",
+          "control": "Product Adapter cannot mark ready before Quality Gate passes",
+          "owner": "QA Engineer",
+          "verification_method": "Run SMK-16 and inspect quality_gate vs handoff_status",
+          "acceptance_criteria": "Every ready brief has quality_gate.passed=true",
+          "related_files": [
+            "15_product_adapter_v3.json",
+            "04_final_quality_gate_v3.json"
+          ]
+        },
+        {
+          "id": "PR-B08",
+          "control": "Cross-agent handoff continuity is intact",
+          "owner": "Integration Engineer",
+          "verification_method": "Run cross-agent field coherence tests COH-101 through COH-106",
+          "acceptance_criteria": "0 missing producer-to-consumer fields",
+          "related_files": [
+            "10_master_orchestrator_v3.json",
+            "11_pattern_validation_agent_v3.json",
+            "12_country_research_agent_v3.json",
+            "13_theme_cluster_agent_v3.json",
+            "14_collection_architect_v3.json",
+            "15_product_adapter_v3.json"
+          ]
+        }
+      ]
+    },
+    {
+      "priority": "critical",
+      "items": [
+        {
+          "id": "PR-C01",
+          "control": "Country Research source governance is enforced",
+          "owner": "Research QA",
+          "verification_method": "Inspect source_refs and uncertainty marking in sample outputs",
+          "acceptance_criteria": "No invented URLs; uncertain items use needs_verification or low confidence",
+          "related_files": [
+            "12_country_research_agent_v3.json"
+          ]
+        },
+        {
+          "id": "PR-C02",
+          "control": "Theme Cluster assigns or rehomes all inventory items",
+          "owner": "Editorial Systems QA",
+          "verification_method": "Run inventory-to-cluster reconciliation using SMK-14",
+          "acceptance_criteria": "0 dropped items; every item is assigned or rehomed",
+          "related_files": [
+            "13_theme_cluster_agent_v3.json",
+            "16_rehoming_protocol_v3.json"
+          ]
+        },
+        {
+          "id": "PR-C03",
+          "control": "Naming convention remains consistent across collection and SKU examples",
+          "owner": "Brand Systems Owner",
+          "verification_method": "Compare naming_logic examples with file naming guidance and test outputs",
+          "acceptance_criteria": "Collection and SKU naming patterns remain stable and scalable",
+          "related_files": [
+            "05_file_naming_convention_v3.json",
+            "14_collection_architect_v3.json"
+          ]
+        },
+        {
+          "id": "PR-C04",
+          "control": "Rehoming entries merge correctly when duplicate suggestions occur",
+          "owner": "Workflow Engineer",
+          "verification_method": "Run SMK-17 against a duplicate rehoming scenario",
+          "acceptance_criteria": "Single merged entry per repeated item/home pair",
+          "related_files": [
+            "16_rehoming_protocol_v3.json"
+          ]
+        },
+        {
+          "id": "PR-C05",
+          "control": "Escalation flags are preserved without silently blocking valid outputs",
+          "owner": "Release Manager",
+          "verification_method": "Run SMK-18 flagged output simulation",
+          "acceptance_criteria": "needs_human_review and review_reasons survive to release review",
+          "related_files": [
+            "17_escalation_protocol_v3.json",
+            "12_country_research_agent_v3.json",
+            "15_product_adapter_v3.json"
+          ]
+        },
+        {
+          "id": "PR-C06",
+          "control": "Governance rules are reviewed and understood by implementation team",
+          "owner": "Tech Lead",
+          "verification_method": "Team walkthrough of 18_governance_rules_v3.json rules G1 through G10",
+          "acceptance_criteria": "All 10 rules understood; enforcement mechanisms identified for each",
+          "related_files": [
+            "18_governance_rules_v3.json"
+          ]
+        }
+      ]
+    },
+    {
+      "priority": "recommended",
+      "items": [
+        {
+          "id": "PR-R01",
+          "control": "At least one end-to-end dry run is stored for regression reference",
+          "owner": "QA Lead",
+          "verification_method": "Execute one topic through the full pipeline and archive artifacts",
+          "acceptance_criteria": "One reusable golden-path run available",
+          "related_files": [
+            "06_smoke_test_matrix_v3.json",
+            "07_full_test_suite_v3.json",
+            "examples/example_flow_italy_pasta_001.json"
+          ]
+        },
+        {
+          "id": "PR-R02",
+          "control": "Keyword and pricing heuristics are reviewed on sample Product Adapter outputs",
+          "owner": "Marketplace Strategist",
+          "verification_method": "Manual review of primary_keywords, secondary_keywords, pricing_notes",
+          "acceptance_criteria": "No obviously weak keyword stacks or unrealistic pricing language",
+          "related_files": [
+            "15_product_adapter_v3.json"
+          ]
+        },
+        {
+          "id": "PR-R03",
+          "control": "Prompt quality spot-check is performed on at least one brief per product type",
+          "owner": "Prompt QA",
+          "verification_method": "Manual prompt review against quality_gate criteria",
+          "acceptance_criteria": "Prompt is concrete, testable, and visually aligned with collection grammar",
+          "related_files": [
+            "04_final_quality_gate_v3.json",
+            "15_product_adapter_v3.json"
+          ]
+        }
+      ]
+    }
+  ],
+  "go_no_go_summary": {
+    "go_if_all_blocking_pass": true,
+    "blocking_count": 8,
+    "critical_count": 6,
+    "recommended_count": 3,
+    "sign_off_required_from": [
+      "QA Lead",
+      "Tech Lead",
+      "Release Manager"
+    ]
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "agent_name": "Country Research Agent",
+  "file_id": "12_country_research_agent_v3",
+  "purpose": "Builds a factual and editorially usable country dossier that later agents can convert into theme clusters and collections.",
+  "owns": [
+    "country dossier",
+    "territorial inventory",
+    "source references",
+    "country-level stereotypes to avoid",
+    "handoff-ready cluster signals"
+  ],
+  "does_not_own": [
+    "final cluster naming",
+    "collection blueprint",
+    "final product prompts"
+  ],
+  "input_contract": {
+    "country": "string",
+    "story_spine": {
+      "core_thesis": "string",
+      "narrative_direction": "string"
+    },
+    "priority_lenses": ["string"],
+    "constraints": {
+      "must_include": ["string"],
+      "must_avoid": ["string"],
+      "audience": ["string"]
+    },
+    "research_depth": "light|standard|deep",
+    "research_mode": "verified_web|offline_reference|mixed",
+    "territorial_inventory_template": {
+      "places": [{"name": "string", "needs_verification": false}],
+      "architectural_or_landscape_markers": [{"name": "string", "needs_verification": false}],
+      "foods_and_table_rituals": [{"name": "string", "needs_verification": false}],
+      "crafts_and_professions": [{"name": "string", "needs_verification": false}],
+      "routes_and_maps": [{"name": "string", "needs_verification": false}],
+      "objects_and_symbols": [{"name": "string", "needs_verification": false}],
+      "mobility_elements": [{"name": "string", "needs_verification": false}]
+    }
+  },
+  "output_contract": {
+    "country_profile": {
+      "country": "string",
+      "high_level_identity": "string",
+      "usable_editorial_vectors": ["string"],
+      "overused_stereotypes_to_avoid": ["string"]
+    },
+    "lens_findings": [
+      {
+        "lens": "string",
+        "hero_subjects": ["string"],
+        "hero_elements": ["string"],
+        "rituals_or_uses": ["string"],
+        "visual_assets": ["string"],
+        "commercial_potential_notes": ["string"]
+      }
+    ],
+    "territorial_inventory": {
+      "places": [{"name": "string", "needs_verification": false}],
+      "architectural_or_landscape_markers": [{"name": "string", "needs_verification": false}],
+      "foods_and_table_rituals": [{"name": "string", "needs_verification": false}],
+      "crafts_and_professions": [{"name": "string", "needs_verification": false}],
+      "routes_and_maps": [{"name": "string", "needs_verification": false}],
+      "objects_and_symbols": [{"name": "string", "needs_verification": false}],
+      "mobility_elements": [{"name": "string", "needs_verification": false}]
+    },
+    "seasonality_and_timing": {
+      "evergreen_angles": ["string"],
+      "seasonal_angles": ["string"]
+    },
+    "research_gaps": ["string"],
+    "source_refs": [
+      {
+        "title": "string",
+        "url": "string",
+        "relevance": "string",
+        "confidence": "high|medium|low"
+      }
+    ],
+    "handoff_ready_clusters": ["string"],
+    "needs_human_review": false
+  },
+  "rules": [
+    "source_refs must contain only verified or explicitly low-confidence references; never invent URLs.",
+    "If web research is unavailable or uncertain, mark corresponding inventory items as needs_verification true.",
+    "Do not reduce the country to clichés.",
+    "Prefer elements that are visually distinctive, culturally grounded, and reusable across multiple product types.",
+    "Explicitly identify stereotypes and weak visual angles to avoid."
+  ],
+  "handoff": {
+    "next_agent": "Theme Cluster Agent",
+    "conditions": [
+      "territorial inventory contains broad coverage across relevant lenses",
+      "source_refs is populated where possible",
+      "handoff_ready_clusters is not empty"
+    ],
+    "on_research_gap": "Set needs_human_review true only if critical gaps cannot be resolved automatically."
+  },
+  "prompt_template": "You are the Country Research Agent in a V3 editorial product system for Ink & Roads by BagarreBazaar. Build a usable country dossier that identifies territorial markers, visual subjects, rituals, routes, food culture, work and craft, and source-backed editorial vectors. Organize findings through the priority lenses. Never invent sources. Return only the full output contract in valid JSON."
+}

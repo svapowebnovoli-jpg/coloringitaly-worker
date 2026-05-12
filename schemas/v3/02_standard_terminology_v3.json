@@ -1,0 +1,28 @@
+{
+  "schema_name": "standard_terminology_v3",
+  "version": "3.1.0",
+  "mandatory": true,
+  "terms": {
+    "story_spine": "The narrative thesis created by the Master Orchestrator that explains what the system is really telling and why it matters.",
+    "lens": "One of the six permanent brand perspectives used to interpret a place.",
+    "research_dossier": "The structured output of a research agent, containing factual findings, source references, notes, and usable editorial signals.",
+    "product_brief": "The execution-ready output of the Product Adapter for one concrete SKU or product format.",
+    "theme_cluster": "A coherent editorial territory inside a country, derived from one primary lens and optionally supported by secondary lenses.",
+    "collection": "A named customer-facing line of products that belongs to one primary theme cluster.",
+    "hero_subjects": "The primary visual subjects of a collection or cluster, e.g. Sicilian coastal roads, fishing boats, baroque facades.",
+    "hero_elements": "The objects or details inside a subject, e.g. nets, anchors, prow shapes, market crates, arch details.",
+    "hero_subject_matrix": "The role assignment of subjects using the allowed roles hero, supporting, background_system.",
+    "visual_grammar": "The immutable visual rules of the brand or collection, e.g. line art, black and white, no fills, editorial hierarchy.",
+    "visual_logic": "How subjects and elements are composed inside a product, e.g. one hero landscape per cover, alternating dense and open pages.",
+    "visual_direction": "The style notes used by the Product Adapter to build generation prompts, e.g. nostalgic illustration, warm editorial tone, high detail.",
+    "map_blueprint": "The high-level editorial strategy for a narrative or informational map, including product goal, narrative goal, primary focus areas, and content constraints. Equivalent to collection_blueprint but map-specific.",
+    "map_structure": "The organizational logic of a map, including geographic areas, POI grouping, route layers, legend structure, and label density strategy.",
+    "style_profile": "The visual design system for a map, including style family, color palette, line treatment, icon direction, and background treatment. Map-specific equivalent to visual_direction.",
+    "map_product_package": "The execution-ready output for a map product, including title, subtitle, deliverables (PDF variants, SVG master), listing logic, and derived product suggestions. Map-specific equivalent to product_brief.",
+    "poi_groups": "Points of Interest organized by category or narrative function in a map, e.g. Tea Culture, Sacred Sites, Craft Locations.",
+    "route_layers": "Visual and navigational routes or journeys in a map, e.g. walking paths, trade routes, pilgrimage circuits, represented with specific line styles or patterns.",
+    "label_density": "The information density strategy for a map, measured on scale (low / medium / high), determining how many labels, POI, and details are visible at once.",
+    "legend_plan": "The structured key or legend for a map, documenting all symbols, colors, icons, and their meanings, ensuring consistent interpretation across deliverables."
+  },
+  "anti_synonym_rule": "Agents must use these exact terms and must not introduce alternative synonyms for the same concept."
+}

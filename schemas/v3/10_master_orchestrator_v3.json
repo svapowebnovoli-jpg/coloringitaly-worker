@@ -1,0 +1,116 @@
+{
+  "agent_name": "Master Orchestrator",
+  "file_id": "10_master_orchestrator_v3",
+  "purpose": "Transforms a broad topic into a coherent editorial production strategy under the hierarchy Topic > Country > Theme Cluster > Collection > Product Brief.",
+  "owns": [
+    "story spine",
+    "country scope decision",
+    "priority lenses",
+    "product family matrix",
+    "global exclusions",
+    "delegation schema"
+  ],
+  "does_not_own": [
+    "final product prompts",
+    "final collection blueprint details",
+    "country factual research"
+  ],
+  "input_contract": {
+    "topic": "string",
+    "country_scope": {
+      "mode": "fixed|candidate_list|open",
+      "countries": ["string"]
+    },
+    "constraints": {
+      "must_include": ["string"],
+      "must_avoid": ["string"],
+      "audience": ["string"],
+      "formats": ["string"],
+      "style_notes": ["string"],
+      "commercial_goal": "string"
+    },
+    "brand_context": {
+      "brand_name": "string",
+      "sub_brand": "string",
+      "positioning": "string",
+      "visual_dna": ["string"]
+    },
+    "output_goal": {
+      "target_collections": 3,
+      "target_product_briefs_per_collection": 3,
+      "depth": "light|standard|deep"
+    },
+    "revision_round": 1
+  },
+  "output_contract": {
+    "story_spine": {
+      "core_thesis": "string",
+      "why_this_topic_matters": "string",
+      "narrative_direction": "string",
+      "editorial_angle": "string",
+      "target_customer_logic": "string",
+      "emotional_register": ["string"]
+    },
+    "country_decision": {
+      "selected_countries": ["string"],
+      "selection_rationale": ["string"],
+      "rejected_countries": [
+        {
+          "country": "string",
+          "reason": "string"
+        }
+      ]
+    },
+    "priority_lenses": [
+      {
+        "lens": "string",
+        "role": "primary|secondary",
+        "why": "string"
+      }
+    ],
+    "product_family_matrix": [
+      {
+        "family": "string",
+        "why_fit": "string",
+        "priority": "high|medium|low"
+      }
+    ],
+    "delegation_schema": {
+      "send_to_pattern_validation": true,
+      "send_to_country_research": true,
+      "send_to_theme_cluster_agent": true,
+      "notes": ["string"]
+    },
+    "global_exclusions": ["string"],
+    "validation_questions": ["string"],
+    "handoff_readiness": {
+      "status": "ready|needs_revision",
+      "missing_items": ["string"]
+    },
+    "revision_round": 1,
+    "revision_reason": "string",
+    "applied_adjustments": ["string"],
+    "remaining_open_questions": ["string"]
+  },
+  "rules": [
+    "Return one complete output contract only; never use alternate simplified schemas.",
+    "Do not jump from topic directly to final SKU ideas.",
+    "Do not turn country directly into collection without first defining lenses and cluster logic.",
+    "If the topic is too broad, narrow it into a usable editorial thesis.",
+    "If the topic is too narrow, expand it into a scalable product system.",
+    "Do not force cars, vehicles, food, or maps unless they are organically relevant.",
+    "Make exclusions explicit."
+  ],
+  "handoff": {
+    "next_agent": "Pattern-Validation-Agent",
+    "conditions": [
+      "story_spine.core_thesis is clear and specific",
+      "2 to 4 priority lenses are selected",
+      "topic to country to product logic is understandable",
+      "global_exclusions is not empty",
+      "handoff_readiness.status is ready"
+    ],
+    "on_failure": "Return needs_revision with missing_items populated."
+  },
+  "prompt_template": "You are the Master Orchestrator of a V3 multi-agent editorial product system for the brand Ink & Roads by BagarreBazaar. Transform the input topic into a coherent, scalable editorial strategy under the hierarchy Topic > Country > Theme Cluster > Collection > Product Brief. Define the Story Spine, choose country scope, select lenses from the 6 permanent brand lenses, decide product families, define exclusions and validation questions, and prepare delegation for downstream agents. Return only the full output contract in valid JSON."
+}

@@ -1,0 +1,69 @@
+{
+  "schema_name": "shared_system_rules_v3",
+  "version": "3.1.0",
+  "always_apply": true,
+  "brand_world": {
+    "brand_name": "BagarreBazaar",
+    "sub_brand": "Ink & Roads",
+    "positioning": "Narrative editorial digital products rooted in the identity of places, not generic tourism.",
+    "core_logic": "Every product must connect a real place, a distinctive local element, a cultural use/ritual/function, and an atmosphere or narrative frame.",
+    "approved_domains": [
+      "architecture",
+      "landscapes",
+      "villages",
+      "historic places",
+      "mobility and transport",
+      "agricultural vehicles and work tools",
+      "recipes and food culture",
+      "maps and routes",
+      "crafts and professions",
+      "objects and local symbols"
+    ],
+    "avoid": [
+      "generic tourism lists",
+      "random mixed bundles",
+      "souvenir-shop randomness",
+      "school-project tone",
+      "stereotype-only collections"
+    ]
+  },
+  "permanent_lenses": [
+    {
+      "name": "Mobility",
+      "definition": "How people, goods, and memory move through a place."
+    },
+    {
+      "name": "Built Place",
+      "definition": "Architecture, settlements, streets, facades, and landscape-made spaces."
+    },
+    {
+      "name": "Table & Food",
+      "definition": "Food culture, recipes, local rituals, markets, and shared table traditions."
+    },
+    {
+      "name": "Work & Craft",
+      "definition": "Manual work, local trades, workshops, farming, fishing, and material culture."
+    },
+    {
+      "name": "Routes & Maps",
+      "definition": "Paths, roads, districts, pilgrim routes, trade routes, neighborhood diagrams, and orientation systems."
+    },
+    {
+      "name": "Objects & Symbols",
+      "definition": "Locally meaningful everyday objects, signage, tools, packaging, motifs, and symbolic forms."
+    }
+  ],
+  "global_quality_rules": [
+    "Specificity over genericity.",
+    "Territory over stereotype.",
+    "Editorial coherence over quantity.",
+    "Reusability over one-off cleverness.",
+    "Product viability over abstract inspiration."
+  ],
+  "output_rules": {
+    "format": "valid_json_only",
+    "if_uncertain": "use explicit uncertainty fields instead of invented facts",
+    "if_incomplete": "set status to needs_revision and list missing items",
+    "empty_data": "use empty arrays instead of fabricating content"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schema_name": "final_quality_gate_v3",
+  "version": "3.1.0",
+  "owner": "Product Adapter",
+  "rule": "Before marking product_briefs[].handoff_status as ready, the Product Adapter must run these checks.",
+  "checks": [
+    {
+      "id": "prompt_testability",
+      "requirement": "generation_prompt includes subject, style/medium, composition guidance, and aspect ratio or format intent"
+    },
+    {
+      "id": "visual_grammar_consistency",
+      "requirement": "brief preserves the collection visual_grammar and does not contradict it"
+    },
+    {
+      "id": "keyword_depth",
+      "requirement": "listing_logic.primary_keywords contains at least 5 strategic keywords"
+    },
+    {
+      "id": "bundle_role_assigned",
+      "requirement": "listing_logic.bundle_role is one of hero, support, entry"
+    },
+    {
+      "id": "specific_risks",
+      "requirement": "risks and production_risks are specific, actionable, and non-generic"
+    }
+  ],
+  "failure_rule": "If one or more checks fail, set handoff_status to needs_revision and explain failures in quality_gate_notes.",
+  "optional_gate_result_shape": {
+    "quality_gate": {
+      "passed": false,
+      "failed_checks": ["string"],
+      "quality_gate_notes": ["string"]
+    }
+  }
+}

@@ -1,0 +1,343 @@
+{
+  "schema_name": "map_generation_agent_v3",
+  "version": "3.1.0",
+  "purpose": "Converts map_blueprint + map_structure + style_profile into concrete render directives and asset generation targets. Bridge between planning (Strategy/Structure/Style) and execution (A9 Asset Generation Agent).",
+  "agent_role": "execution_bridge",
+  "ownership": {
+    "owns": [
+      "render_prompt",
+      "render_spec",
+      "render_mode",
+      "asset_generation_targets",
+      "layout_constraints",
+      "post_render_checks",
+      "composition_logic"
+    ],
+    "does_not_own": [
+      "product strategy (Strategy Agent)",
+      "map structure/POI (Structure Agent)",
+      "visual family/palette (Style Agent)",
+      "final QA decisions (QA Agent)"
+    ]
+  },
+  "input_contract": {
+    "shape": {
+      "map_blueprint": {
+        "description": "High-level map concept, goals, narrative",
+        "fields": [
+          "map_type",
+          "product_goal",
+          "narrative_goal",
+          "primary_focus",
+          "detail_level",
+          "must_include",
+          "must_avoid"
+        ]
+      },
+      "map_structure": {
+        "description": "POI/route/area organization",
+        "fields": [
+          "primary_areas",
+          "secondary_areas",
+          "poi_groups",
+          "route_layers",
+          "legend_plan",
+          "label_density_recommendation"
+        ]
+      },
+      "style_profile": {
+        "description": "Visual family, palette, line treatment, icons, background",
+        "fields": [
+          "style_family",
+          "palette",
+          "line_treatment",
+          "icon_direction",
+          "background_treatment",
+          "style_reference_notes"
+        ]
+      }
+    }
+  },
+  "output_contract": {
+    "render_prompt": {
+      "type": "string",
+      "description": "Concrete prompt for Midjourney/DALL-E/Recraft: directives for map composition, POI placement, route visualization, label strategy. Format: subject + style + composition + technical specs.",
+      "example": "Editorial map of Kyoto neighborhoods. Primary focus: Gion, Arashiyama, Higashiyama districts with tea houses, temples, craft shops as primary POI. Routes: walking paths between districts (dashed lines). Style: black line art, editorial serif labels, 2-color palette (charcoal + cream), Snazzy Maps-inspired minimalism. Label density: medium (readable but not cluttered). Aspect ratio: 16:10 landscape. No photographs. No watercolor. No 3D."
+    },
+    "render_spec": {
+      "type": "object",
+      "description": "Technical specifications for asset generation",
+      "fields": {
+        "canvas_dimensions": "string (e.g., '2560 x 1600 px for 16:10 landscape')",
+        "dpi": "number (300 for print)",
+        "output_format": "string (e.g., 'PNG + SVG layered master')",
+        "color_mode": "string (e.g., 'RGB for screen + CMYK for print')",
+        "aspect_ratio": "string (e.g., '16:10 landscape or 1:1 square')",
+        "bleed_margin": "string (e.g., '0.125 inches for KDP/Etsy')"
+      }
+    },
+    "render_mode": {
+      "type": "string",
+      "enum": [
+        "single_pass",
+        "layered_composition",
+        "segmented_regional",
+        "route_overlay"
+      ],
+      "description": "How to generate: single continuous render vs. layer-by-layer vs. geographic zones vs. route-focused"
+    },
+    "asset_generation_targets": {
+      "type": "array",
+      "description": "Specific assets to generate (not just one map, but component breakdown)",
+      "items": {
+        "target_id": "string (e.g., 'map_base_layer', 'poi_overlay_gion', 'route_overlay_walking')",
+        "subject": "string",
+        "render_prompt_delta": "string (customization to main prompt)",
+        "priority": "string (high|medium|low)",
+        "post_render_treatment": "string (e.g., 'isolate on transparent', 'colorize legend', 'add drop shadow')"
+      }
+    },
+    "layout_constraints": {
+      "type": "object",
+      "description": "Spatial rules for final composition",
+      "fields": {
+        "safe_zone_margins": "string (e.g., '0.5 inch top/bottom for title; 0.25 inch left/right')",
+        "legend_placement": "string (e.g., 'bottom-right corner, 2 x 3 inches')",
+        "scale_bar_placement": "string (e.g., 'bottom-left, horizontal')",
+        "title_area": "string (e.g., 'top 1 inch, centered')",
+        "poi_label_spacing_minimum": "string (e.g., '0.15 inches between labels')",
+        "route_line_weight": "string (e.g., '1.5 pt for primary, 0.75 pt for secondary')"
+      }
+    },
+    "post_render_checks": {
+      "type": "array",
+      "description": "Validation checklist for A10 (QA Agent) after generation",
+      "items": "string"
+    },
+    "composition_logic": {
+      "type": "object",
+      "description": "Step-by-step composition instructions for asset gen pipeline",
+      "fields": {
+        "base_map_foundation": "string (what goes down first)",
+        "layering_order": "array of strings (layer sequence: base → primary_areas → secondary → poi_groups → routes → legend)",
+        "poi_grouping_visual_strategy": "string (how to distinguish groups: color, icon style, size, clustering)",
+        "route_visualization": "string (lines, dashes, arrows, thickness variation)",
+        "label_strategy": "string (placement, font sizing, hierarchy, serif vs sans)",
+        "background_treatment": "string (white, cream, subtle texture, etc.)"
+      }
+    },
+    "rehoming_candidates": {
+      "type": "array",
+      "description": "POI/route/area that fit style but aren't in final render (for rehoming_log.json)",
+      "items": {
+        "item": "string",
+        "suggested_future_home": "string",
+        "why": "string"
+      }
+    },
+    "confidence": {
+      "type": "number (0-100)",
+      "description": "Confidence that this render will pass QA on first attempt"
+    },
+    "needs_human_review": {
+      "type": "boolean",
+      "description": "Flag if composition logic is complex or untested and needs human cartographer sign-off before render"
+    }
+  },
+  "example_flow": {
+    "input": {
+      "map_blueprint": {
+        "map_type": "illustrated_neighborhood_map",
+        "product_goal": "Educational coloring + reference guide for Kyoto neighborhoods",
+        "narrative_goal": "Show how Kyoto's geisha and craft districts are organized and connected",
+        "primary_focus": [
+          "Gion (geisha/tea culture)",
+          "Arashiyama (temples/bamboo)",
+          "Higashiyama (craft shops/temples)"
+        ],
+        "detail_level": "medium",
+        "must_include": [
+          "walking routes between districts",
+          "tea houses",
+          "temples",
+          "craft shops"
+        ],
+        "must_avoid": [
+          "modern commercial zones",
+          "parking lots",
+          "tourist infrastructure labels"
+        ]
+      },
+      "map_structure": {
+        "primary_areas": [
+          "Gion district (southern zone)",
+          "Arashiyama district (western zone)",
+          "Higashiyama district (eastern zone)"
+        ],
+        "poi_groups": [
+          {
+            "group_name": "Tea Culture",
+            "items": [
+              "Kikunoi tea house",
+              "Gion Okutan (tofu restaurant)",
+              "Mizuki tea room"
+            ]
+          },
+          {
+            "group_name": "Sacred Sites",
+            "items": [
+              "Fushimi Inari (shrine approach)",
+              "Kiyomizu-dera (temple)",
+              "Ryoanji (rock garden)"
+            ]
+          },
+          {
+            "group_name": "Craft",
+            "items": [
+              "Weaving studio (Nishijin)",
+              "Lacquerware shop",
+              "Pottery district"
+            ]
+          }
+        ],
+        "route_layers": [
+          "Walking path: Gion ↔ Higashiyama (20 min)",
+          "Walking path: Higashiyama ↔ Arashiyama (45 min, via temple circuit)",
+          "Geisha walk (evening traditional route)"
+        ],
+        "legend_plan": [
+          "Tea houses (teacup icon)",
+          "Temples/shrines (torii gate icon)",
+          "Craft shops (hammer/needle icon)",
+          "Walking routes (dashed line = pedestrian)"
+        ],
+        "label_density_recommendation": "medium"
+      },
+      "style_profile": {
+        "style_family": "Editorial Minimalist (Snazzy Maps inspired)",
+        "palette": [
+          "#2C2C2C (charcoal for lines)",
+          "#F5F3EE (warm cream background)",
+          "#D4A574 (accent for tea culture POI)",
+          "#8B6F47 (secondary accent for craft)"
+        ],
+        "line_treatment": [
+          "1.5 pt for primary roads",
+          "0.75 pt for secondary paths",
+          "0.5 pt for walking routes (dashed)"
+        ],
+        "icon_direction": [
+          "Minimal, geometric icons",
+          "Consistent 20–40 px size",
+          "Line art (no fills)"
+        ],
+        "background_treatment": [
+          "Warm cream, no texture",
+          "White water areas (rivers/pond)"
+        ],
+        "style_reference_notes": [
+          "Reference: Snazzy Maps 'Tokyo Minimalist'",
+          "Sophisticated, not cartoonish",
+          "Editorial tone (magazine, not tourist brochure)"
+        ]
+      }
+    },
+    "output": {
+      "render_prompt": "Editorial map of Kyoto neighborhoods showing geisha and craft districts. Primary focus: Gion (south), Arashiyama (west), Higashiyama (east). Include: tea houses (teacup icon), temples/shrines (torii icon), craft shops (hammer icon). Routes: walking paths between districts (dashed lines, labeled with time estimates). Style: black line art on warm cream background, editorial minimalist, Snazzy Maps-inspired, 2-color palette (charcoal + accent), serif labels. Label density: medium (readable without clutter). Avoid: modern commercial, parking lots, tourist infrastructure. Medium detail level. Aspect ratio: 16:10 landscape. No photographs, no watercolor, no 3D, no fills.",
+      "render_spec": {
+        "canvas_dimensions": "2560 x 1600 px",
+        "dpi": 300,
+        "output_format": "PNG (screen) + SVG master (editable)",
+        "color_mode": "RGB for screen, CMYK export for print",
+        "aspect_ratio": "16:10 landscape",
+        "bleed_margin": "0.125 inches all sides"
+      },
+      "render_mode": "layered_composition",
+      "asset_generation_targets": [
+        {
+          "target_id": "map_base_layer",
+          "subject": "Kyoto neighborhood boundaries, water, primary streets",
+          "priority": "high",
+          "post_render_treatment": "Base layer, no transparency"
+        },
+        {
+          "target_id": "poi_overlay_tea",
+          "subject": "Tea houses, tea-related locations with teacup icons",
+          "priority": "high",
+          "post_render_treatment": "Overlay on transparent, color accent = warm brown"
+        },
+        {
+          "target_id": "poi_overlay_sacred",
+          "subject": "Temples and shrines with torii gate icons",
+          "priority": "high",
+          "post_render_treatment": "Overlay on transparent"
+        },
+        {
+          "target_id": "route_overlay_walking",
+          "subject": "Walking paths between districts, dashed lines with time labels",
+          "priority": "medium",
+          "post_render_treatment": "Overlay, thin dashed lines"
+        }
+      ],
+      "layout_constraints": {
+        "safe_zone_margins": "0.5 in top (title), 0.25 in left/right, 0.5 in bottom (legend)",
+        "legend_placement": "bottom-right corner, max 2.5 x 3 inches",
+        "scale_bar_placement": "bottom-left, horizontal, 1 inch width",
+        "title_area": "top-center, max 1 inch height",
+        "poi_label_spacing_minimum": "0.2 inches",
+        "route_line_weight": "1.5 pt primary streets, 0.75 pt secondary, 0.5 pt walking routes"
+      },
+      "post_render_checks": [
+        "All POI icons visible and correctly placed",
+        "Route labels legible and properly positioned",
+        "Line weights consistent per style_profile",
+        "No label overlaps (minimum 0.2 inch spacing)",
+        "Color palette matches style_profile (charcoal + cream + 2 accents)",
+        "Legend complete and correctly referenced",
+        "Scale bar present and readable",
+        "All must_include items present",
+        "All must_avoid items absent",
+        "Background treatment matches specification (warm cream, no texture)"
+      ],
+      "composition_logic": {
+        "base_map_foundation": "Neighborhood boundaries (black 1.5pt lines) + water areas (white) on cream background",
+        "layering_order": [
+          "Background (cream)",
+          "Water/geographic features (white)",
+          "Neighborhood boundaries + streets",
+          "Primary areas (subtle shading or boundary highlight)",
+          "POI symbols (tea, sacred, craft)",
+          "Route overlays (walking paths, dashed)",
+          "Labels (hierarchy: district names largest, POI names medium, route times small)",
+          "Legend (bottom-right)",
+          "Scale bar (bottom-left)"
+        ],
+        "poi_grouping_visual_strategy": "Each group has distinct icon style. Tea = teacup (warm brown accent). Sacred = torii (black). Craft = hammer (secondary accent). All icons 20–30 px, line art, no fills.",
+        "route_visualization": "Walking routes = 0.5pt dashed black lines. Time labels inline or nearby: '20 min walk'. No arrows, just dashed pattern to show pedestrian movement.",
+        "label_strategy": "Serif font (editorial). District names: 18pt bold, charcoal. POI names: 11pt regular, charcoal. Route times: 9pt italic, charcoal. All labels have subtle background clearance (no text over icons).",
+        "background_treatment": "Warm cream (#F5F3EE), solid, no texture or pattern"
+      },
+      "rehoming_candidates": [
+        {
+          "item": "Philosopher's Walk (scenic northern route)",
+          "suggested_future_home": "Expanded map: Kyoto Walking Circuits (multi-day edition)",
+          "why": "Fits product goal but too long for neighborhood focus. Strong for future route-focused map."
+        },
+        {
+          "item": "Imperial Palace complex (Gosho)",
+          "suggested_future_home": "Historical Kyoto: Imperial & Administrative Centers",
+          "why": "Important but not central to geisha/craft narrative. Better as centerpiece of different map."
+        }
+      ],
+      "confidence": 85,
+      "needs_human_review": false
+    }
+  },
+  "governance_notes": {
+    "ownership_clarity": "This agent is a translator, not a creator. It consumes planning outputs and converts them to execution directives.",
+    "no_strategic_revision": "If Map Strategy/Structure/Style need changes, those go back to their agents, not here.",
+    "revision_protocol": "Map Generation Agent does not have revision loop. It produces render_prompt once. If rejected by QA, failure escalates to appropriate upstream agent (Strategy/Structure/Style).",
+    "quality_gate_handoff": "Output must include post_render_checks that QA Agent will validate. Generation Agent is responsible for feasibility assessment, not final QA.",
+    "rehoming_integration": "Map Generation Agent identifies POI/routes/areas that are brand-fit but not in this render. These go to rehoming_log.json for future homes (G7 governance rule)."
+  }
+}

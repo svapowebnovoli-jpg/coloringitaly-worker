@@ -11,6 +11,7 @@ import requests
 import img2pdf
 import subprocess
 import zipfile
+import boto3
 from flask import Flask, request, jsonify
 from PIL import Image, ImageOps, ImageDraw, ImageFont
 from PyPDF2 import PdfWriter
@@ -36,6 +37,17 @@ OVAL_H = int(os.getenv("OVAL_H", "1800"))
 COVER_FONT_SIZE  = int(os.getenv("COVER_FONT_SIZE", "100"))
 BRAND_FONT_SIZE  = int(os.getenv("BRAND_FONT_SIZE", "55"))
 COVER_FONT_PATH  = os.getenv("COVER_FONT_PATH", str(TEMPLATES_ROOT / "fonts" / "cover-title.ttf"))
+
+# Grok / xAI Image Generation (per futura integrazione API)
+XAI_API_KEY = os.getenv("XAI_API_KEY", "")
+XAI_MODEL = os.getenv("XAI_MODEL", "grok-2-image")
+
+# MinIO / S3 Configuration
+MINIO_ENDPOINT = os.getenv("MINIO_URL", "http://187.124.180.109:9000").replace("http://", "").replace("https://", "")
+MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY", "minioadmin")
+MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY", "minioadmin")
+MINIO_BUCKET = os.getenv("MINIO_BUCKET", "coloring-outbox")
+MINIO_USE_SSL = os.getenv("MINIO_USE_SSL", "false").lower() == "true"
 
 
 def ensure_job_dirs(job_id: str):
@@ -136,19 +148,33 @@ def copy_and_normalize_pages(job_id: str):
 
     pages = list_page_candidates(raw)
     cover_present = False
+    normalized_names = []
+
+    # Handle cover.png (required)
     cover_src = raw / "cover.png"
     if cover_src.exists():
         shutil.copy2(cover_src, normalized / "cover.png")
         cover_present = True
+        normalized_names.append("cover.png")
+        pages = [p for p in pages if p.name.lower() != "cover.png"]
     else:
         alt_cover = next((p for p in list_pngs(raw) if p.stem.lower() == "cover"), None)
         if alt_cover:
             shutil.copy2(alt_cover, normalized / "cover.png")
             cover_present = True
+            normalized_names.append("cover.png")
+            pages = [p for p in pages if p.name.lower() != alt_cover.name.lower()]
 
-    normalized_names = []
+    # Handle instructions.png (optional)
+    instructions_src = raw / "instructions.png"
+    if instructions_src.exists():
+        shutil.copy2(instructions_src, normalized / "instructions.png")
+        normalized_names.append("instructions.png")
+        pages = [p for p in pages if p.name.lower() != "instructions.png"]
+
+    # Rename remaining pages as 01.png, 02.png, etc.
     for idx, src in enumerate(pages, start=1):
-        dst = normalized / f"page_{idx:02d}.png"
+        dst = normalized / f"{idx:02d}.png"
         shutil.copy2(src, dst)
         normalized_names.append(dst.name)
 
@@ -193,7 +219,8 @@ def build_render_sequence(job_id: str, variant: str, page_size: tuple[int, int])
     tmp_variant.mkdir(parents=True, exist_ok=True)
 
     cover = normalized / "cover.png"
-    pages = sorted(normalized.glob("page_*.png"))
+    instructions = normalized / "instructions.png"
+    pages = sorted(normalized.glob("[0-9][0-9].png"))
     if not cover.exists():
         raise FileNotFoundError("cover.png mancante")
     if not pages:
@@ -205,14 +232,23 @@ def build_render_sequence(job_id: str, variant: str, page_size: tuple[int, int])
     fit_image_to_canvas(cover, page_size, cover_dst)
     rendered.append(cover_dst)
 
+    # Add instructions page if exists
+    if instructions.exists():
+        instructions_dst = tmp_variant / "001_instructions.png"
+        fit_image_to_canvas(instructions, page_size, instructions_dst)
+        rendered.append(instructions_dst)
+        page_offset = 2
+    else:
+        page_offset = 1
+
     if variant.startswith("etsy"):
-        for i, page in enumerate(pages, start=1):
+        for i, page in enumerate(pages, start=page_offset):
             dst = tmp_variant / f"{i:03d}_page.png"
             fit_image_to_canvas(page, page_size, dst)
             rendered.append(dst)
 
     elif variant.startswith("kdp"):
-        counter = 1
+        counter = page_offset
         for page in pages:
             art_dst = tmp_variant / f"{counter:03d}_art.png"
             fit_image_to_canvas(page, page_size, art_dst)
@@ -502,7 +538,7 @@ def confeziona():
     try:
         dirs = ensure_job_dirs(job_id)
         normalized = dirs["normalized"]
-        pages = sorted(normalized.glob("page_*.png"))
+        pages = sorted(normalized.glob("[0-9][0-9].png"))
         cover = normalized / "cover.png"
 
         if not pages:
@@ -571,6 +607,24 @@ def confeziona():
             "mockup_ids": {}
         })
         log_event(job_id, "/confeziona completato")
+
+        # Esegui QA in thread separato (non blocca la response)
+        def _run_qa_background():
+            try:
+                from qa_runner import run_qa, write_report
+                qa_report = run_qa(job_id)
+                write_report(job_id, qa_report)
+                update_status(job_id, qa_status=qa_report)
+                log_event(job_id, f"QA completed: {qa_report['overall'].upper()}")
+                if qa_report['blockers']:
+                    log_event(job_id, f"QA blockers: {qa_report['blockers']}")
+            except Exception as e:
+                log_event(job_id, f"QA failed: {e}")
+
+        import threading
+        qa_thread = threading.Thread(target=_run_qa_background, daemon=True)
+        qa_thread.start()
+
         return jsonify({"ok": True, **final})
     except Exception as e:
         err = update_status(job_id, status="error", error=str(e), chat_id=chat_id)
@@ -619,6 +673,82 @@ def cleanup():
         "removed": removed,
         "count": total_removed
     })
+
+
+def upload_to_minio(job_id: str):
+    """Upload all PDFs from output/ to MinIO"""
+    try:
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=f"http://{MINIO_ENDPOINT}" if not MINIO_USE_SSL else f"https://{MINIO_ENDPOINT}",
+            aws_access_key_id=MINIO_ACCESS_KEY,
+            aws_secret_access_key=MINIO_SECRET_KEY,
+            region_name="us-east-1"
+        )
+
+        dirs = ensure_job_dirs(job_id)
+        output_dir = dirs["output"]
+        uploaded = {}
+
+        if not output_dir.exists():
+            raise FileNotFoundError(f"Output directory not found: {output_dir}")
+
+        # Upload all PDF files
+        for pdf_file in output_dir.glob("*.pdf"):
+            key = f"{job_id}/{pdf_file.name}"
+            s3.upload_file(
+                str(pdf_file),
+                MINIO_BUCKET,
+                key,
+                ExtraArgs={"ContentType": "application/pdf"}
+            )
+            uploaded[pdf_file.name] = key
+            log_event(job_id, f"MinIO upload: {pdf_file.name} → s3://{MINIO_BUCKET}/{key}")
+
+        return {
+            "ok": True,
+            "job_id": job_id,
+            "bucket": MINIO_BUCKET,
+            "uploaded_count": len(uploaded),
+            "uploaded_files": uploaded
+        }
+    except Exception as e:
+        log_event(job_id, f"MinIO upload error: {traceback.format_exc()}")
+        return {
+            "ok": False,
+            "job_id": job_id,
+            "error": str(e)
+        }
+
+
+@app.post("/upload-to-minio")
+@require_auth
+def upload_to_minio_endpoint():
+    body = request.get_json(force=True, silent=True) or {}
+    job_id = str(body.get("job_id", "")).strip()
+    callback_url = body.get("callback_url")
+    chat_id = str(body.get("chat_id", "")).strip()
+
+    if not job_id:
+        return jsonify({"ok": False, "error": "job_id mancante"}), 400
+
+    try:
+        update_status(job_id, status="uploading", chat_id=chat_id)
+        result = upload_to_minio(job_id)
+
+        if result["ok"]:
+            final = update_status(job_id, status="uploaded", chat_id=chat_id, minio_uploads=result["uploaded_files"], error="")
+            callback(callback_url, {"status": "uploaded", "job_id": job_id, "chat_id": chat_id, "uploaded_count": result["uploaded_count"]})
+            return jsonify({"ok": True, **final})
+        else:
+            err = update_status(job_id, status="upload_error", error=result["error"], chat_id=chat_id)
+            callback(callback_url, {"status": "upload_error", "job_id": job_id, "chat_id": chat_id, "error": result["error"]})
+            return jsonify({"ok": False, **err}), 500
+    except Exception as e:
+        err = update_status(job_id, status="upload_error", error=str(e), chat_id=chat_id)
+        log_event(job_id, traceback.format_exc())
+        callback(callback_url, {"status": "upload_error", "job_id": job_id, "chat_id": chat_id, "error": str(e)})
+        return jsonify({"ok": False, **err}), 500
 
 
 if __name__ == "__main__":

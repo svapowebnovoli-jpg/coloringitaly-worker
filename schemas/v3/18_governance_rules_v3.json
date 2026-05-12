@@ -1,0 +1,67 @@
+{
+  "schema_name": "governance_rules_v3",
+  "version": "3.1.0",
+  "purpose": "Prevent system degradation and maintain quality over time.",
+  "rules": [
+    {
+      "rule_id": "G1_terminology_purity",
+      "rule": "All agents must use only the standard terminology defined in 02_standard_terminology_v3.json. No synonyms. No new terms without approval.",
+      "enforcement": "Code review before deployment. Reject if agent introduces a new term field where a standard term exists.",
+      "failure_mode": "System becomes unreadable when different agents use different words for the same concept."
+    },
+    {
+      "rule_id": "G2_one_contract_per_agent",
+      "rule": "Each agent has exactly one input contract and one output contract. No lite or detailed variants. If a variant is needed, create a new agent.",
+      "enforcement": "Schema validation. Reject files with multiple input_contract or output_contract keys.",
+      "failure_mode": "Implementers become confused about which schema to use; incompatible outputs."
+    },
+    {
+      "rule_id": "G3_inventory_assignment",
+      "rule": "Every item in territorial_inventory must be assigned to exactly one primary theme cluster or sent to rehoming. No unassigned items floating.",
+      "enforcement": "Theme Cluster Agent output must include assigned_inventory_items for each cluster.",
+      "failure_mode": "Ideas fall through cracks; collections become incomplete or incoherent."
+    },
+    {
+      "rule_id": "G4_revision_cap",
+      "rule": "Pattern-Validation revise loop is capped at revision_round = 2. If still revise after round 2, escalate to human review. No infinite loops.",
+      "enforcement": "Revision Protocol enforces max_revision_rounds = 2. After round 2 revise, set needs_human_review = true automatically.",
+      "failure_mode": "System gets stuck in revision loop; work never ships."
+    },
+    {
+      "rule_id": "G5_quality_gate_mandatory",
+      "rule": "Product Adapter must run quality_gate checks before marking handoff_status = ready. No exceptions.",
+      "enforcement": "Reject product_briefs with handoff_status=ready if quality_gate.passed=false.",
+      "failure_mode": "Incomplete or untestable briefs reach production; waste of downstream effort."
+    },
+    {
+      "rule_id": "G6_prompt_ownership",
+      "rule": "Collection Architect owns visual_direction and prompt_notes (the why and how-it-should-feel). Product Adapter owns generation_prompt (the actual prompt for Midjourney/DALL-E). Never reverse this.",
+      "enforcement": "Code review. Reject if generation_prompt appears in Collection Architect output. Reject if visual_direction missing from Collection Architect.",
+      "failure_mode": "Prompts become incoherent; collection identity lost; adaptability breaks."
+    },
+    {
+      "rule_id": "G7_rehoming_register",
+      "rule": "If system has persistent storage, maintain rehoming_log.json. If the same item is suggested multiple times, merge entries and track status: pending|approved|implemented.",
+      "enforcement": "Before creating new rehoming_idea, check register for duplicates. If found, merge and append agent names.",
+      "failure_mode": "Same idea suggested multiple times; redundant future work; confusion about what was already decided."
+    },
+    {
+      "rule_id": "G8_source_verification",
+      "rule": "source_refs in Country Research output must contain only verified or explicitly low-confidence references. Never invent URLs.",
+      "enforcement": "Code review. Check source_refs.confidence is one of high|medium|low. Flag any ref with no confidence field.",
+      "failure_mode": "Downstream teams use fake sources; research loses credibility."
+    },
+    {
+      "rule_id": "G9_no_generic_tourism",
+      "rule": "All outputs must avoid generic tourism logic, random monument lists, and school-project tone. Every claim must connect place + local element + cultural use + narrative frame.",
+      "enforcement": "Reviewer spot-checks narratives. Reject if found to be generic.",
+      "failure_mode": "Shop becomes indistinguishable from generic travel printables; no competitive advantage."
+    },
+    {
+      "rule_id": "G10_escalation_not_blocking",
+      "rule": "needs_human_review = true does NOT block handoff. It flags the output for later review. Always use it when confidence is low, gaps exist, or risks are critical.",
+      "enforcement": "Validators allow handoff_status=ready with needs_human_review=true. Operational teams track these separately.",
+      "failure_mode": "Work jams because every uncertainty blocks the system; team burns out waiting for perfect inputs."
+    }
+  ]
+}

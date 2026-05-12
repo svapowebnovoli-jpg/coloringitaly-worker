@@ -1,0 +1,17 @@
+{
+  "schema_name": "rehoming_protocol_v3",
+  "version": "3.1.0",
+  "purpose": "Centralizes future-home suggestions for items that fit the brand but not the current cluster or collection.",
+  "optional": true,
+  "register_shape": [
+    {
+      "item": "string",
+      "suggested_by_agent": "string",
+      "suggested_future_home": "string",
+      "status": "pending|approved|implemented",
+      "notes": ["string"]
+    }
+  ],
+  "merge_rule": "If the same item is suggested two or more times, merge entries and append the agent names to notes or a contributors field.",
+  "recommended_file_name": "rehoming_log.json"
+}

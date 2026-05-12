@@ -1,0 +1,50 @@
+{
+  "package_name": "bagarrebazaar_ink_and_roads_v3_repo_ready_json",
+  "version": "3.1.0",
+  "status": "repo_ready",
+  "purpose": "Claude Code / n8n multi-agent editorial product system focused on country identity, theme clusters, collections, and product briefs.",
+  "hierarchy": ["Topic", "Country", "Theme Cluster", "Collection", "Product Brief"],
+  "files": [
+    "00_package_manifest_v3.json",
+    "01_shared_system_rules_v3.json",
+    "02_standard_terminology_v3.json",
+    "03_revision_protocol_v3.json",
+    "04_final_quality_gate_v3.json",
+    "05_file_naming_convention_v3.json",
+    "06_smoke_test_matrix_v3.json",
+    "07_full_test_suite_v3.json",
+    "08_pre_release_checklist_v3.json",
+    "10_master_orchestrator_v3.json",
+    "11_pattern_validation_agent_v3.json",
+    "12_country_research_agent_v3.json",
+    "13_theme_cluster_agent_v3.json",
+    "14_collection_architect_v3.json",
+    "15_product_adapter_v3.json",
+    "16_rehoming_protocol_v3.json",
+    "17_escalation_protocol_v3.json",
+    "18_governance_rules_v3.json",
+    "examples/example_flow_italy_pasta_001.json"
+  ],
+  "total_files": 19,
+  "file_groups": {
+    "shared_rules": ["01", "02", "03", "04", "05"],
+    "qa_layer": ["06", "07", "08"],
+    "agents": ["10", "11", "12", "13", "14", "15"],
+    "protocols": ["16", "17", "18"],
+    "examples": ["examples/"]
+  },
+  "design_notes": [
+    "One real input/output contract per agent; no lite variants.",
+    "Product Adapter owns the final generation prompts.",
+    "Collection Architect owns collection logic and prompt notes only.",
+    "Pattern revise loop is capped at 2 rounds before human review.",
+    "Standard terminology is mandatory across all agents.",
+    "Optimization 1: territorial_inventory explicit in Country Research input.",
+    "Optimization 2: revision_context added to Pattern-Validation input.",
+    "Optimization 3: visual_logic_refinement_notes in Collection Architect.",
+    "06_smoke_test_matrix_v3.json: 10 smoke tests (SMK-00 through SMK-18).",
+    "07_full_test_suite_v3.json: full schema + coherence + handoff + blocker catalog.",
+    "08_pre_release_checklist_v3.json: 8 blocking + 6 critical + 3 recommended checks.",
+    "18_governance_rules_v3.json: 10 governance rules (G1-G10) for system integrity."
+  ]
+}

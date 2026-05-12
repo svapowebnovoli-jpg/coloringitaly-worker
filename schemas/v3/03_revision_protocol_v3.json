@@ -1,0 +1,23 @@
+{
+  "schema_name": "revision_protocol_v3",
+  "version": "3.1.0",
+  "trigger": "Pattern-Validation-Agent returns handoff_decision = revise",
+  "protocol": [
+    "Master Orchestrator receives the validation report.",
+    "Master Orchestrator reviews recommended_adjustments, red_flags, suggested_exclusions, and handoff_notes.",
+    "Master Orchestrator produces a new full output version tagged revision_round = 2.",
+    "Pattern-Validation-Agent receives only the new full output version for a second pass.",
+    "If the second pass is still revise, escalate to human review and stop the automated loop."
+  ],
+  "max_revision_rounds": 2,
+  "required_fields_on_revision": [
+    "revision_round",
+    "revision_reason",
+    "applied_adjustments",
+    "remaining_open_questions"
+  ],
+  "escalation_after_second_revise": {
+    "needs_human_review": true,
+    "reason_template": "Pattern validation still unresolved after second pass."
+  }
+}

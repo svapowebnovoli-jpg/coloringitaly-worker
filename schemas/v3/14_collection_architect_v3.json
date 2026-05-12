@@ -1,0 +1,109 @@
+{
+  "agent_name": "Collection Architect",
+  "file_id": "14_collection_architect_v3",
+  "purpose": "Turns one approved theme cluster into a named, customer-facing collection blueprint with SKU logic and adapter-ready guidance.",
+  "owns": [
+    "collection blueprint",
+    "customer promise",
+    "visual grammar",
+    "hero subject matrix",
+    "naming logic",
+    "bundle logic",
+    "adapter handoff guidance"
+  ],
+  "does_not_own": [
+    "final generation prompts"
+  ],
+  "input_contract": {
+    "country": "string",
+    "story_spine": {
+      "type": "object — use output shape from 10_master_orchestrator_v3.json"
+    },
+    "selected_cluster": {
+      "cluster_name": "string",
+      "primary_lens": "string",
+      "cluster_thesis": "string",
+      "hero_subjects": ["string"],
+      "hero_elements": ["string"],
+      "visual_logic": ["string"],
+      "product_fit": ["string"]
+    },
+    "country_dossier": {
+      "type": "object — use output shape from 12_country_research_agent_v3.json"
+    },
+    "brand_context": {
+      "tone": ["string"],
+      "visual_dna": ["string"],
+      "naming_style": "string"
+    },
+    "collection_goal": {
+      "target_skus": 3,
+      "positioning": "entry|core|premium|seasonal"
+    }
+  },
+  "output_contract": {
+    "collection_blueprint": {
+      "collection_name": "string",
+      "country": "string",
+      "parent_cluster": "string",
+      "collection_thesis": "string",
+      "customer_promise": "string",
+      "visual_grammar": ["string"],
+      "visual_logic": ["string"],
+      "visual_logic_refinement_notes": ["string — how CA extended or refined visual_logic from the cluster"],
+      "naming_logic": {
+        "series_pattern": "string",
+        "sku_title_pattern": "string",
+        "example": "Ink & Roads — Sicily — Stone Streets"
+      },
+      "hero_subjects": ["string"],
+      "hero_elements": ["string"],
+      "hero_subject_matrix": [
+        {
+          "subject": "string",
+          "role": "hero|supporting|background_system"
+        }
+      ],
+      "recommended_sku_types": [
+        {
+          "product_type": "string",
+          "why_fit": "string",
+          "priority": "high|medium|low"
+        }
+      ],
+      "bundle_logic": ["string"],
+      "exclusions": ["string"],
+      "rehoming_candidates": [
+        {
+          "item": "string",
+          "future_collection": "string"
+        }
+      ]
+    },
+    "adapter_handoff_package": {
+      "must_build_first": ["string"],
+      "nice_to_build_next": ["string"],
+      "prompt_notes": ["string"],
+      "production_risks": ["string"],
+      "notes": ["string"]
+    }
+  },
+  "rules": [
+    "Collection Architect defines the why and how-it-should-feel, not the final generation prompt.",
+    "The final generation prompt is always the Product Adapter's responsibility.",
+    "Use standard terminology only: hero_subjects, hero_elements, visual_grammar, visual_logic.",
+    "A collection must feel like a named editorial line, not an asset folder.",
+    "Provide scalable naming logic with at least one explicit example."
+  ],
+  "handoff": {
+    "next_agent": "Product Adapter",
+    "conditions": [
+      "collection_blueprint.collection_thesis is clear",
+      "collection_blueprint.customer_promise is defined",
+      "recommended_sku_types is prioritized",
+      "adapter_handoff_package.prompt_notes is populated",
+      "adapter_handoff_package.production_risks is populated"
+    ]
+  },
+  "prompt_template": "You are the Collection Architect in a V3 editorial product system for Ink & Roads by BagarreBazaar. Turn one approved theme cluster into a named collection blueprint with customer promise, visual grammar, hero subject matrix, naming logic, SKU logic, exclusions, and adapter handoff notes. Do not write final generation prompts — provide visual_direction and prompt_notes only. Return only the full output contract in valid JSON."
+}

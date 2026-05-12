@@ -1,0 +1,344 @@
+{
+  "example_name": "Italy Pasta Culture — End-to-End Flow",
+  "version": "3.1.0",
+  "purpose": "Golden-path example showing how a topic flows through all 6 agents to produce final product briefs. Use as regression baseline.",
+  "flow": [
+    {
+      "step": 1,
+      "agent": "Master Orchestrator",
+      "input": {
+        "topic": "Italian Pasta Culture and Ritual",
+        "country_scope": {"mode": "fixed", "countries": ["Italy"]},
+        "constraints": {
+          "must_include": ["table rituals", "regional pasta shapes", "market culture"],
+          "must_avoid": ["generic Italian stereotype", "high-end restaurant culture"],
+          "audience": ["adult stress-relief", "cultural enthusiasts"],
+          "formats": ["coloring_book", "illustrated_map", "recipe_cards", "clipart_bundle"],
+          "commercial_goal": "evergreen core product + seasonal variants"
+        },
+        "output_goal": {"target_collections": 2, "target_product_briefs_per_collection": 3, "depth": "standard"},
+        "revision_round": 1
+      },
+      "output": {
+        "story_spine": {
+          "core_thesis": "The Italian table is not a meal — it is a ritual of place, ingredient, and time.",
+          "narrative_direction": "From farm to fork to table: how pasta embodies regional identity, seasonal rhythm, and human connection.",
+          "emotional_register": ["warm", "nostalgic", "grounded"]
+        },
+        "priority_lenses": [
+          {"lens": "Table & Food", "role": "primary", "why": "Pasta is culture through eating"},
+          {"lens": "Routes & Maps", "role": "secondary", "why": "Regional pasta traditions map to geography"},
+          {"lens": "Objects & Symbols", "role": "secondary", "why": "Pasta shapes, kitchen tools, market crates"}
+        ],
+        "product_family_matrix": [
+          {"family": "adult_coloring_book", "why_fit": "Pasta shapes + table rituals = meditative subject", "priority": "high"},
+          {"family": "recipe_cards", "why_fit": "Core idea is table tradition", "priority": "high"},
+          {"family": "illustrated_map", "why_fit": "Regional pasta variations by geography", "priority": "medium"},
+          {"family": "clipart_bundle", "why_fit": "Pasta, utensils, market objects reusable", "priority": "medium"}
+        ],
+        "global_exclusions": ["fine dining imagery", "restaurant culture", "modern fusion"],
+        "handoff_readiness": {"status": "ready", "missing_items": []}
+      }
+    },
+    {
+      "step": 2,
+      "agent": "Pattern-Validation-Agent",
+      "input": "Master output + revision_context (revision_round=1)",
+      "output": {
+        "validation_report": {
+          "narrative_coherence": 9,
+          "brand_fit": "high",
+          "editorial_distinctiveness": "high",
+          "scalability_signal": "high",
+          "market_signal": "Strong evergreen with seasonal variant potential"
+        },
+        "red_flags": [],
+        "handoff_decision": "approve",
+        "handoff_notes": {
+          "to_country_research_agent": ["Focus on Table & Food and regional specificity, not generic Italy"],
+          "to_theme_cluster_agent": ["Prioritize ritual and material culture over restaurant-world references"]
+        },
+        "needs_human_review": false
+      }
+    },
+    {
+      "step": 3,
+      "agent": "Country Research Agent",
+      "input": "Story spine + priority lenses + Italy",
+      "output": {
+        "country_profile": {
+          "country": "Italy",
+          "high_level_identity": "A country where food is inseparable from place, season, and social ritual.",
+          "usable_editorial_vectors": ["regional pasta culture", "market life", "table ritual", "agricultural heritage"],
+          "overused_stereotypes_to_avoid": ["pizza/pasta generics", "gondolas", "Colosseum without narrative context"]
+        },
+        "territorial_inventory": {
+          "foods_and_table_rituals": [
+            {"name": "Cacio e pepe — Lazio regional identity", "needs_verification": false},
+            {"name": "Tagliatelle al ragù — Bologna egg pasta culture", "needs_verification": false},
+            {"name": "Arancini — Sicily street food and market culture", "needs_verification": false},
+            {"name": "Pasta all'amatriciana — Roman table ritual", "needs_verification": false},
+            {"name": "Pasta fresca making ritual — rolling, cutting, resting", "needs_verification": false}
+          ],
+          "objects_and_symbols": [
+            {"name": "Wooden pasta fork and board", "needs_verification": false},
+            {"name": "Market crate with vegetables", "needs_verification": false},
+            {"name": "Ceramic pasta bowls — regional variation", "needs_verification": false},
+            {"name": "Pasta drying rack", "needs_verification": false}
+          ],
+          "routes_and_maps": [
+            {"name": "Northern wheat belt to pasta production regions", "needs_verification": false},
+            {"name": "Regional market day routes", "needs_verification": false}
+          ],
+          "mobility_elements": [
+            {"name": "Three-wheel cargo scooter at market", "needs_verification": false}
+          ]
+        },
+        "handoff_ready_clusters": [
+          "Pasta & Regional Identity",
+          "Market & Seasonal Ritual",
+          "Table as Ceremony"
+        ]
+      }
+    },
+    {
+      "step": 4,
+      "agent": "Theme Cluster Agent",
+      "input": "Country dossier + story spine",
+      "output": {
+        "theme_clusters": [
+          {
+            "cluster_name": "Pasta & Regional Identity",
+            "primary_lens": "Table & Food",
+            "secondary_lenses": ["Objects & Symbols"],
+            "cluster_thesis": "Pasta shapes embody the geography, climate, and history of their region.",
+            "hero_subjects": ["cacio e pepe ritual", "tagliatelle bolognese", "arancini process"],
+            "hero_elements": ["pasta shapes", "rolling hands", "ceramic bowls", "wooden fork"],
+            "visual_logic": ["one ritual per page spread", "close-up details alternating with full scene"],
+            "product_fit": ["adult_coloring_book", "recipe_cards", "clipart_bundle"],
+            "cluster_score": {"distinctiveness": 5, "reusability": 5, "visual_strength": 4, "commercial_range": 5},
+            "assigned_inventory_items": [
+              "Cacio e pepe — Lazio regional identity",
+              "Tagliatelle al ragù — Bologna egg pasta culture",
+              "Arancini — Sicily street food and market culture",
+              "Pasta all'amatriciana — Roman table ritual",
+              "Pasta fresca making ritual — rolling, cutting, resting",
+              "Wooden pasta fork and board",
+              "Ceramic pasta bowls — regional variation",
+              "Pasta drying rack"
+            ]
+          },
+          {
+            "cluster_name": "Market & Seasonal Ritual",
+            "primary_lens": "Objects & Symbols",
+            "secondary_lenses": ["Routes & Maps", "Mobility"],
+            "cluster_thesis": "Buying ingredients for pasta is a cultural practice: which market, which season, which vendor.",
+            "hero_subjects": ["Italian market day", "vegetable crates", "pasta shapes by season"],
+            "cluster_score": {"distinctiveness": 4, "reusability": 4, "visual_strength": 5, "commercial_range": 4},
+            "assigned_inventory_items": [
+              "Market crate with vegetables",
+              "Northern wheat belt to pasta production regions",
+              "Regional market day routes",
+              "Three-wheel cargo scooter at market"
+            ]
+          }
+        ],
+        "recommended_priority_order": ["Pasta & Regional Identity", "Market & Seasonal Ritual"]
+      }
+    },
+    {
+      "step": 5,
+      "agent": "Collection Architect",
+      "input": "Selected cluster: Pasta & Regional Identity",
+      "output": {
+        "collection_blueprint": {
+          "collection_name": "Ink & Roads — Italy — Pasta & Place",
+          "collection_thesis": "Pasta is geography made edible. Every shape, every sauce, every ritual belongs to a place.",
+          "customer_promise": "Discover the regional stories behind Italian pasta through meditative coloring, mapping, and recipes.",
+          "visual_grammar": ["line art", "black & white", "no fills", "editorial hierarchy", "detailed ornamentation on pasta shapes"],
+          "visual_logic": ["one ritual or shape per spread", "hero subject centered, elements surrounding", "open negative space for coloring"],
+          "naming_logic": {
+            "series_pattern": "Ink & Roads — Italy — Pasta & Place",
+            "sku_title_pattern": "Ink & Roads — Italy — Pasta & Place [Product Type]",
+            "example": "Ink & Roads — Italy — Pasta & Place Coloring Book"
+          },
+          "hero_subject_matrix": [
+            {"subject": "cacio e pepe ritual", "role": "hero"},
+            {"subject": "tagliatelle shapes", "role": "hero"},
+            {"subject": "wooden pasta fork", "role": "supporting"},
+            {"subject": "ceramic bowls", "role": "background_system"}
+          ],
+          "recommended_sku_types": [
+            {"product_type": "adult_coloring_book", "why_fit": "Pasta shapes + table setting = meditative", "priority": "high"},
+            {"product_type": "recipe_cards", "why_fit": "Core idea is ritual and tradition", "priority": "high"},
+            {"product_type": "clipart_bundle", "why_fit": "Utensils, shapes, market objects highly reusable", "priority": "medium"}
+          ],
+          "bundle_logic": [
+            "Bundle 1: Coloring Book + Recipe Cards ($7.99, save $0.99)",
+            "Bundle 2: All three ($14.99, save $2.98)"
+          ]
+        },
+        "adapter_handoff_package": {
+          "must_build_first": ["adult_coloring_book"],
+          "nice_to_build_next": ["recipe_cards", "clipart_bundle"],
+          "prompt_notes": [
+            "Warm, nostalgic editorial tone",
+            "Detail-rich pasta shapes, utensils, hands in action",
+            "Avoid cute or cartoonish; aim for sophisticated line art",
+            "High detail on protagonist subject, minimal background"
+          ],
+          "production_risks": [
+            "Pasta shape accuracy important for credibility",
+            "Hand positions in coloring must be clear and anatomically sensible"
+          ]
+        }
+      }
+    },
+    {
+      "step": 6,
+      "agent": "Product Adapter",
+      "input": "Collection blueprint + adapter handoff",
+      "output": {
+        "product_briefs": [
+          {
+            "product_type": "adult_coloring_book",
+            "title": "Ink & Roads — Italy — Pasta & Place Coloring Book",
+            "subtitle": "The Shapes and Rituals of Italian Pasta",
+            "collection_name": "Pasta & Place",
+            "core_promise": "Meditative coloring exploring pasta shapes and table rituals across Italian regions.",
+            "content_structure": [
+              "Cover: feature pasta shape with regional markers",
+              "Pages 1-3: Cacio e pepe ritual — ingredients, preparation, plating",
+              "Pages 4-6: Tagliatelle and regional variations",
+              "Pages 7-9: Arancini and market culture",
+              "Pages 10-12: Table setting and utensil rituals",
+              "Pages 13-15: Seasonal pasta by region"
+            ],
+            "visual_direction": [
+              "Sophisticated line art, black & white",
+              "High detail on pasta shapes, minimal backgrounds",
+              "Hands in action: cooking, eating, market buying",
+              "Warm editorial tone, nostalgic but contemporary"
+            ],
+            "format_specs": {
+              "page_count_or_asset_count": "20 pages + cover",
+              "dimensions": "8.5 x 11 inches",
+              "deliverables": ["PDF Etsy US Letter", "PDF KDP US Letter", "PDF Etsy A4", "PDF KDP A4"]
+            },
+            "prompt_package": {
+              "generation_prompt": "Editorial illustration of Italian pasta and table ritual. Subject: [cacio e pepe / tagliatelle / arancini / pasta maker hands / wooden fork and ceramic bowl]. Style: sophisticated black & white line art, warm nostalgic editorial tone, high detail on protagonist subject, minimal background. Medium: pen and ink. Aspect ratio: 8.5x11 portrait. No fills, line art only.",
+              "negative_prompt": "cartoonish, cute, colored, watercolor, modern, minimalist, 3D, photograph, low detail, clipart",
+              "layout_notes": ["Center hero subject at two-thirds height", "Leave margins open for coloring"],
+              "thumbnail_notes": ["Feature one iconic pasta shape on white background", "Bold compositional contrast"]
+            },
+            "listing_logic": {
+              "primary_keywords": ["Italian pasta coloring book", "regional pasta traditions", "table rituals coloring", "adult stress relief coloring", "editorial line art printable"],
+              "secondary_keywords": ["cacio e pepe", "tagliatelle", "arancini", "meditative coloring", "Italian food art"],
+              "positioning_angle": "Narrative coloring — not random drawings, but the real story of Italian pasta culture",
+              "bundle_role": "hero"
+            },
+            "pricing_notes": "$5.99 USD (entry + core product, high margin)",
+            "risks": [
+              "Pasta shape accuracy critical — wrong shapes lose credibility with Italian food enthusiasts",
+              "Hand anatomy must be correct in cooking ritual pages"
+            ],
+            "quality_gate": {
+              "passed": true,
+              "failed_checks": [],
+              "quality_gate_notes": ["All 5 checks passed: prompt testable, visual grammar preserved, 5+ keywords, bundle_role assigned, risks specific"]
+            },
+            "handoff_status": "ready"
+          },
+          {
+            "product_type": "recipe_cards",
+            "title": "Ink & Roads — Italy — Pasta & Place Recipe Cards",
+            "subtitle": "5 Regional Pasta Recipes with Story",
+            "collection_name": "Pasta & Place",
+            "core_promise": "5 regional pasta recipes with story, ingredients, and ritual context.",
+            "content_structure": [
+              "Card 1: Cacio e pepe (Lazio)",
+              "Card 2: Tagliatelle al ragù (Bologna)",
+              "Card 3: Arancini (Sicily)",
+              "Card 4: Pasta all'amatriciana (Rome)",
+              "Card 5: Pasta fresca — the rolling ritual (regional)"
+            ],
+            "format_specs": {
+              "page_count_or_asset_count": "5 cards",
+              "dimensions": "4 x 6 inches",
+              "deliverables": ["PDF printable set"]
+            },
+            "prompt_package": {
+              "generation_prompt": "Editorial line art illustration for recipe card. Subject: [pasta dish name + key ingredient or ritual object]. Style: black & white pen and ink, warm nostalgic, high detail on food subject. Aspect ratio: 4x6. No fills.",
+              "negative_prompt": "cartoon, color, photo, generic food illustration",
+              "layout_notes": ["Illustration top half, recipe text area bottom half"],
+              "thumbnail_notes": ["Show one card face with strongest visual subject"]
+            },
+            "listing_logic": {
+              "primary_keywords": ["Italian pasta recipe cards", "regional pasta printable", "food ritual cards", "Italian kitchen art", "printable recipe set"],
+              "secondary_keywords": ["cacio e pepe recipe", "tagliatelle card", "Italian food culture"],
+              "bundle_role": "support"
+            },
+            "pricing_notes": "$2.99 USD (support product, pairs with coloring book)",
+            "risks": ["Recipe accuracy must be verified — incorrect proportions damage credibility"],
+            "quality_gate": {"passed": true, "failed_checks": [], "quality_gate_notes": []},
+            "handoff_status": "ready"
+          },
+          {
+            "product_type": "clipart_bundle",
+            "title": "Ink & Roads — Italy — Pasta & Place Clipart Bundle",
+            "subtitle": "45 Pasta, Kitchen & Market Illustrations",
+            "collection_name": "Pasta & Place",
+            "core_promise": "45 vector illustrations: pasta shapes, utensils, ingredients, market objects.",
+            "content_structure": [
+              "Pasta shapes (12)",
+              "Utensils and tableware (8)",
+              "Market objects and crates (10)",
+              "Regional ingredient markers (8)",
+              "Hands and ritual scenes (7)"
+            ],
+            "format_specs": {
+              "page_count_or_asset_count": "45 assets",
+              "dimensions": "Variable",
+              "deliverables": ["PNG + SVG ZIP organized by category"]
+            },
+            "prompt_package": {
+              "generation_prompt": "Editorial black & white line art clipart. Subject: [pasta shape / kitchen utensil / market crate / ingredient]. Style: pen and ink, isolated on white, no background, high detail, consistent line weight. No fills.",
+              "negative_prompt": "colored, gradient, 3D, photo, background, drop shadow",
+              "layout_notes": ["Single object per asset, centered on transparent/white"],
+              "thumbnail_notes": ["Grid of 6-9 best assets on clean white background"]
+            },
+            "listing_logic": {
+              "primary_keywords": ["pasta clipart bundle", "Italian kitchen illustrations", "food line art printable", "editorial clipart", "Italian market objects"],
+              "secondary_keywords": ["pasta shapes SVG", "kitchen utensils clipart", "market crate illustration"],
+              "bundle_role": "entry"
+            },
+            "pricing_notes": "$7.99 USD (entry product, reusable across multiple platforms)",
+            "risks": ["45 assets is a large batch — plan generation in themed sessions of 10-12 to maintain style consistency"],
+            "quality_gate": {"passed": true, "failed_checks": [], "quality_gate_notes": []},
+            "handoff_status": "ready"
+          }
+        ],
+        "launch_sequence": [
+          "1. Adult coloring book — hero product, drives traffic",
+          "2. Clipart bundle — entry product, 48h after coloring launch",
+          "3. Recipe cards — support product, 1 week after"
+        ],
+        "bundle_strategy": [
+          "Bundle A: Coloring Book + Recipe Cards ($7.99, save $0.99)",
+          "Bundle B: All three products ($14.99, save $2.98)"
+        ],
+        "cross_sell_paths": [
+          "From coloring book → clipart bundle (same visual system, different use)",
+          "From recipe cards → illustrated map of regional pasta routes (future product)"
+        ],
+        "needs_human_review": false
+      }
+    }
+  ],
+  "lessons_learned": [
+    "Topic to Story Spine to Lenses to Clusters to Collections to Briefs is a natural flow.",
+    "Each agent adds specificity; no step is redundant.",
+    "Revision at Pattern-Validation stage saved time by catching generic positioning early.",
+    "Inventory assignment to clusters was critical: every item found a home."
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema_name": "escalation_protocol_v3",
+  "version": "3.1.0",
+  "purpose": "Defines when outputs can continue while still being flagged for human review.",
+  "rule": "Any agent may set needs_human_review to true when confidence is low, research gaps are unresolved, or production risks are critical.",
+  "does_not_auto_block": true,
+  "flag_conditions": [
+    "research_gaps cannot be resolved automatically",
+    "production risks are critical",
+    "confidence is effectively below 60 percent",
+    "second revision loop still unresolved"
+  ],
+  "notification_shape": {
+    "needs_human_review": true,
+    "review_reasons": ["string"],
+    "ready_but_flagged": true
+  }
+}

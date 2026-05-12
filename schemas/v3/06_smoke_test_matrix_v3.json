@@ -1,0 +1,445 @@
+{
+  "file_name": "06_smoke_test_matrix_v3.json",
+  "version": "3.1.0",
+  "purpose": "Minimum executable smoke tests for the V3 package before production use.",
+  "package_under_test": "bagarrebazaar_ink_and_roads_v3_repo_ready_json",
+  "required_files": [
+    "00_package_manifest_v3.json",
+    "01_shared_system_rules_v3.json",
+    "02_standard_terminology_v3.json",
+    "03_revision_protocol_v3.json",
+    "04_final_quality_gate_v3.json",
+    "05_file_naming_convention_v3.json",
+    "06_smoke_test_matrix_v3.json",
+    "07_full_test_suite_v3.json",
+    "08_pre_release_checklist_v3.json",
+    "10_master_orchestrator_v3.json",
+    "11_pattern_validation_agent_v3.json",
+    "12_country_research_agent_v3.json",
+    "13_theme_cluster_agent_v3.json",
+    "14_collection_architect_v3.json",
+    "15_product_adapter_v3.json",
+    "16_rehoming_protocol_v3.json",
+    "17_escalation_protocol_v3.json",
+    "18_governance_rules_v3.json",
+    "examples/example_flow_italy_pasta_001.json"
+  ],
+  "execution_order": [
+    "SMK-00",
+    "SMK-10",
+    "SMK-11",
+    "SMK-12",
+    "SMK-13",
+    "SMK-14",
+    "SMK-15",
+    "SMK-16",
+    "SMK-17",
+    "SMK-18"
+  ],
+  "tests": [
+    {
+      "id": "SMK-00",
+      "name": "package_integrity_and_json_parse",
+      "scope": "package",
+      "files_under_test": [
+        "00_package_manifest_v3.json",
+        "01_shared_system_rules_v3.json",
+        "02_standard_terminology_v3.json",
+        "03_revision_protocol_v3.json",
+        "04_final_quality_gate_v3.json",
+        "05_file_naming_convention_v3.json",
+        "06_smoke_test_matrix_v3.json",
+        "07_full_test_suite_v3.json",
+        "08_pre_release_checklist_v3.json",
+        "10_master_orchestrator_v3.json",
+        "11_pattern_validation_agent_v3.json",
+        "12_country_research_agent_v3.json",
+        "13_theme_cluster_agent_v3.json",
+        "14_collection_architect_v3.json",
+        "15_product_adapter_v3.json",
+        "16_rehoming_protocol_v3.json",
+        "17_escalation_protocol_v3.json",
+        "18_governance_rules_v3.json",
+        "examples/example_flow_italy_pasta_001.json"
+      ],
+      "dependencies": [],
+      "sample_input": {
+        "package_path": "./v3_repo_ready_json/",
+        "manifest_file": "00_package_manifest_v3.json"
+      },
+      "expected_output_or_state": [
+        "All required JSON files exist",
+        "All required JSON files parse successfully",
+        "Manifest file list matches the real file list"
+      ],
+      "pass_criteria": [
+        "No JSON parser errors",
+        "No missing files",
+        "No extra undocumented files using competing contracts"
+      ],
+      "fail_criteria": [
+        "Any file is missing",
+        "Any file is invalid JSON",
+        "Manifest file list differs from actual package contents"
+      ],
+      "blocking_errors": [
+        "PKG-001",
+        "PKG-002",
+        "PKG-003"
+      ]
+    },
+    {
+      "id": "SMK-10",
+      "name": "master_orchestrator_baseline_output",
+      "scope": "agent",
+      "files_under_test": [
+        "10_master_orchestrator_v3.json",
+        "01_shared_system_rules_v3.json",
+        "02_standard_terminology_v3.json"
+      ],
+      "dependencies": ["SMK-00"],
+      "sample_input": {
+        "topic": "Italy through villages, roads, local food rituals, and heritage landscapes",
+        "country_scope": {
+          "mode": "fixed",
+          "countries": ["Italy"]
+        },
+        "constraints": {
+          "must_include": ["villages", "routes", "food culture"],
+          "must_avoid": ["generic tourist lists", "random monuments"],
+          "audience": ["adults", "heritage lovers", "travel-oriented printable buyers"],
+          "formats": ["coloring_book", "illustrated_map", "recipe_cards"],
+          "style_notes": ["editorial", "heritage", "line-art friendly"],
+          "commercial_goal": "Build 3 coherent collections with cross-sell potential"
+        },
+        "brand_context": {
+          "brand_name": "BagarreBazaar",
+          "sub_brand": "Ink & Roads",
+          "positioning": "Narrative editorial digital products rooted in the identity of places",
+          "visual_dna": ["line art", "editorial tone", "country specificity"]
+        },
+        "output_goal": {
+          "target_collections": 3,
+          "target_product_briefs_per_collection": 3,
+          "depth": "standard"
+        },
+        "revision_round": 1
+      },
+      "expected_output_fields": [
+        "story_spine",
+        "country_decision",
+        "priority_lenses",
+        "product_family_matrix",
+        "delegation_schema",
+        "global_exclusions",
+        "validation_questions",
+        "handoff_readiness",
+        "revision_round",
+        "revision_reason",
+        "applied_adjustments",
+        "remaining_open_questions"
+      ],
+      "pass_criteria": [
+        "One full output contract only",
+        "story_spine.core_thesis is non-empty",
+        "2 to 4 priority lenses are selected",
+        "handoff_readiness.status is ready or needs_revision",
+        "global_exclusions contains at least 2 explicit exclusions"
+      ],
+      "fail_criteria": [
+        "Simplified contract returned instead of full contract",
+        "Missing story_spine.core_thesis",
+        "No validation_questions",
+        "No handoff_readiness object"
+      ],
+      "blocking_errors": ["MST-001", "MST-002"]
+    },
+    {
+      "id": "SMK-11",
+      "name": "pattern_validation_approve_path",
+      "scope": "agent",
+      "files_under_test": [
+        "11_pattern_validation_agent_v3.json",
+        "03_revision_protocol_v3.json"
+      ],
+      "dependencies": ["SMK-10"],
+      "sample_input_reference": "Use the successful output of SMK-10 with handoff_readiness.status=ready",
+      "expected_output_fields": [
+        "validation_report",
+        "suggested_prioritization",
+        "red_flags",
+        "suggested_exclusions",
+        "rehoming_ideas",
+        "recommended_adjustments",
+        "handoff_decision",
+        "handoff_notes",
+        "needs_human_review"
+      ],
+      "pass_criteria": [
+        "validation_report.narrative_coherence is between 1 and 10",
+        "handoff_decision is approve when the pattern is coherent",
+        "handoff_notes includes downstream notes",
+        "needs_human_review is false on first successful pass"
+      ],
+      "fail_criteria": [
+        "Missing handoff_decision",
+        "Missing recommended_adjustments",
+        "Narrative coherence outside 1-10 range"
+      ],
+      "blocking_errors": ["PAT-001"]
+    },
+    {
+      "id": "SMK-12",
+      "name": "pattern_validation_revise_loop",
+      "scope": "protocol",
+      "files_under_test": [
+        "11_pattern_validation_agent_v3.json",
+        "10_master_orchestrator_v3.json",
+        "03_revision_protocol_v3.json"
+      ],
+      "dependencies": ["SMK-10"],
+      "sample_input": {
+        "story_spine": {
+          "core_thesis": "Italy is beautiful",
+          "narrative_direction": "general travel",
+          "editorial_angle": "generic tourism"
+        },
+        "country_decision": {"selected_countries": ["Italy"]},
+        "priority_lenses": ["Built Place"],
+        "product_family_matrix": ["coloring_book"],
+        "global_exclusions": [],
+        "constraints": {
+          "audience": ["all"],
+          "formats": ["all"],
+          "commercial_goal": "sell something"
+        },
+        "revision_round": 1
+      },
+      "expected_output_or_state": [
+        "Pattern returns handoff_decision=revise",
+        "Master produces revision_round=2 output",
+        "Second validation pass occurs once",
+        "If still revise on round 2, needs_human_review=true and loop stops"
+      ],
+      "pass_criteria": [
+        "Exactly one automated retry after first revise",
+        "No infinite loop",
+        "Second revise escalates to human review"
+      ],
+      "fail_criteria": [
+        "No clear revise handoff back to Master",
+        "More than 2 automated rounds",
+        "No escalation after second revise"
+      ],
+      "blocking_errors": ["REV-001", "REV-002"]
+    },
+    {
+      "id": "SMK-13",
+      "name": "country_research_verified_mode",
+      "scope": "agent",
+      "files_under_test": [
+        "12_country_research_agent_v3.json",
+        "02_standard_terminology_v3.json"
+      ],
+      "dependencies": ["SMK-11"],
+      "sample_input": {
+        "country": "Italy",
+        "story_spine": {
+          "core_thesis": "Italy told through lived landscapes, village routes, and table rituals",
+          "narrative_direction": "place identity through daily material culture"
+        },
+        "priority_lenses": ["Built Place", "Routes & Maps", "Table & Food"],
+        "constraints": {
+          "must_include": ["villages", "roads", "markets"],
+          "must_avoid": ["generic bucket-list attractions"],
+          "audience": ["adults", "travel-inspired printable buyers"]
+        },
+        "research_depth": "standard",
+        "research_mode": "verified_web"
+      },
+      "expected_output_fields": [
+        "country_profile",
+        "lens_findings",
+        "territorial_inventory",
+        "seasonality_and_timing",
+        "research_gaps",
+        "source_refs",
+        "handoff_ready_clusters",
+        "needs_human_review"
+      ],
+      "pass_criteria": [
+        "source_refs contains only verified or explicitly low-confidence sources",
+        "territorial_inventory items use needs_verification where needed",
+        "lens_findings use hero_subjects and hero_elements, not synonyms",
+        "handoff_ready_clusters is non-empty"
+      ],
+      "fail_criteria": [
+        "Invented URLs",
+        "No source confidence signaling",
+        "No territorial inventory coverage across relevant lenses"
+      ],
+      "blocking_errors": ["CTR-001", "CTR-002"]
+    },
+    {
+      "id": "SMK-14",
+      "name": "theme_cluster_assignment_and_rehoming",
+      "scope": "agent",
+      "files_under_test": [
+        "13_theme_cluster_agent_v3.json",
+        "16_rehoming_protocol_v3.json"
+      ],
+      "dependencies": ["SMK-13"],
+      "sample_input_reference": "Use the country dossier from SMK-13",
+      "expected_output_fields": [
+        "theme_clusters",
+        "rejected_cluster_paths",
+        "recommended_priority_order",
+        "rehoming_ideas",
+        "handoff_to_collection_architect"
+      ],
+      "pass_criteria": [
+        "Each theme cluster has one primary_lens",
+        "Each selected cluster has hero_subjects, hero_elements, visual_logic, product_fit, assigned_inventory_items",
+        "Every territorial inventory item is assigned to one primary cluster or moved to rehoming_ideas",
+        "recommended_priority_order is not empty"
+      ],
+      "fail_criteria": [
+        "Unassigned inventory items disappear",
+        "Clusters behave like generic topic piles",
+        "No rehoming path for out-of-cluster items"
+      ],
+      "blocking_errors": ["THM-001", "THM-002"]
+    },
+    {
+      "id": "SMK-15",
+      "name": "collection_architect_blueprint_readiness",
+      "scope": "agent",
+      "files_under_test": [
+        "14_collection_architect_v3.json",
+        "05_file_naming_convention_v3.json"
+      ],
+      "dependencies": ["SMK-14"],
+      "sample_input_reference": "Use one selected cluster from SMK-14, preferably a high-priority cluster",
+      "expected_output_fields": [
+        "collection_blueprint",
+        "adapter_handoff_package"
+      ],
+      "pass_criteria": [
+        "collection_blueprint contains collection_thesis and customer_promise",
+        "visual_grammar and visual_logic are both present and distinct",
+        "hero_subject_matrix roles use only hero|supporting|background_system",
+        "naming_logic contains series_pattern, sku_title_pattern, and example",
+        "adapter_handoff_package.prompt_notes exists but does not attempt to replace the final generation prompt"
+      ],
+      "fail_criteria": [
+        "Collection Architect generates final generation_prompt",
+        "No naming example",
+        "No production_risks"
+      ],
+      "blocking_errors": ["COL-001", "COL-002"]
+    },
+    {
+      "id": "SMK-16",
+      "name": "product_adapter_quality_gate_ready_path",
+      "scope": "agent",
+      "files_under_test": [
+        "15_product_adapter_v3.json",
+        "04_final_quality_gate_v3.json"
+      ],
+      "dependencies": ["SMK-15"],
+      "sample_input_reference": "Use collection_blueprint and adapter_handoff_package from SMK-15 with target_product_types=[coloring_book, illustrated_map, recipe_cards]",
+      "expected_output_fields": [
+        "product_briefs",
+        "launch_sequence",
+        "bundle_strategy",
+        "cross_sell_paths",
+        "needs_human_review"
+      ],
+      "pass_criteria": [
+        "Every product brief contains prompt_package.generation_prompt",
+        "Every product brief contains at least 5 primary keywords",
+        "Every product brief has listing_logic.bundle_role set to hero, support, or entry",
+        "quality_gate.passed=true is required before handoff_status=ready",
+        "Product Adapter owns the final generation prompt"
+      ],
+      "fail_criteria": [
+        "handoff_status=ready while quality_gate.passed=false",
+        "Primary keywords fewer than 5",
+        "Prompt package missing generation_prompt",
+        "Prompt clearly generic or not testable"
+      ],
+      "blocking_errors": ["PAD-001", "PAD-002", "QGT-001"]
+    },
+    {
+      "id": "SMK-17",
+      "name": "rehoming_register_merge_behavior",
+      "scope": "protocol",
+      "files_under_test": ["16_rehoming_protocol_v3.json"],
+      "dependencies": ["SMK-14"],
+      "sample_input": {
+        "existing_rehoming_log": [
+          {
+            "item": "Sicilian pastry culture",
+            "suggested_by_agent": "Theme Cluster Agent",
+            "suggested_future_home": "Italian Bakeries & Sweets",
+            "status": "pending",
+            "notes": ["Strong fit but outside current routes-focused cluster"]
+          }
+        ],
+        "new_rehoming_entry": {
+          "item": "Sicilian pastry culture",
+          "suggested_by_agent": "Country Research Agent",
+          "suggested_future_home": "Italian Bakeries & Sweets",
+          "status": "pending",
+          "notes": ["Also surfaced in food ritual research"]
+        }
+      },
+      "expected_output_or_state": [
+        "Single merged log entry remains for the repeated item",
+        "Agent provenance is preserved in notes or contributor tracking"
+      ],
+      "pass_criteria": [
+        "No duplicate rehoming entries for the same item and future home",
+        "Merged entry keeps historical notes"
+      ],
+      "fail_criteria": [
+        "Duplicate entries remain without merge",
+        "Agent provenance is lost"
+      ],
+      "blocking_errors": ["REH-001"]
+    },
+    {
+      "id": "SMK-18",
+      "name": "escalation_flag_non_blocking_behavior",
+      "scope": "protocol",
+      "files_under_test": [
+        "17_escalation_protocol_v3.json",
+        "12_country_research_agent_v3.json",
+        "15_product_adapter_v3.json"
+      ],
+      "dependencies": ["SMK-13", "SMK-16"],
+      "sample_input": {
+        "agent_output_excerpt": {
+          "needs_human_review": true,
+          "review_reasons": ["UNESCO source gap", "pricing confidence below threshold"],
+          "ready_but_flagged": true
+        }
+      },
+      "expected_output_or_state": [
+        "Output can remain structurally complete while flagged",
+        "Review reasons are explicit",
+        "Flag does not silently disappear downstream"
+      ],
+      "pass_criteria": [
+        "needs_human_review can coexist with otherwise valid output",
+        "review reasons are preserved",
+        "Flagged outputs are clearly visible to release owner"
+      ],
+      "fail_criteria": [
+        "Flagging blocks all output without reason",
+        "Flagging is impossible even when critical gaps exist"
+      ],
+      "blocking_errors": ["ESC-001"]
+    }
+  ]
+}

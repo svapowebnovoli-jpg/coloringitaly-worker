@@ -1,0 +1,98 @@
+{
+  "agent_name": "Pattern-Validation-Agent",
+  "file_id": "11_pattern_validation_agent_v3",
+  "purpose": "Evaluates whether the proposed Story Spine is coherent, brand-aligned, and commercially useful before full downstream research begins.",
+  "owns": [
+    "pattern validation",
+    "prioritization advice",
+    "red flags",
+    "rehoming ideas",
+    "approve/revise/reject decision"
+  ],
+  "does_not_own": [
+    "country research",
+    "theme clustering",
+    "final prompts"
+  ],
+  "input_contract": {
+    "story_spine": {
+      "core_thesis": "string",
+      "narrative_direction": "string",
+      "editorial_angle": "string"
+    },
+    "country_decision": {
+      "selected_countries": ["string"]
+    },
+    "priority_lenses": ["string"],
+    "product_family_matrix": ["string"],
+    "global_exclusions": ["string"],
+    "constraints": {
+      "audience": ["string"],
+      "formats": ["string"],
+      "commercial_goal": "string"
+    },
+    "revision_context": {
+      "revision_round": 1,
+      "prior_adjustments_applied": ["string"],
+      "validation_notes_from_prior_round": ["string"]
+    }
+  },
+  "output_contract": {
+    "validation_report": {
+      "narrative_coherence": "integer_1_to_10",
+      "brand_fit": "high|medium|low",
+      "market_signal": "string",
+      "editorial_distinctiveness": "high|medium|low",
+      "scalability_signal": "high|medium|low"
+    },
+    "suggested_prioritization": [
+      {
+        "product_family": "string",
+        "priority": "integer_starting_at_1",
+        "why": "string"
+      }
+    ],
+    "red_flags": ["string"],
+    "suggested_exclusions": ["string"],
+    "rehoming_ideas": [
+      {
+        "item": "string",
+        "suggested_future_home": "string",
+        "why": "string"
+      }
+    ],
+    "recommended_adjustments": ["string"],
+    "handoff_decision": "approve|revise|reject",
+    "handoff_notes": {
+      "notes": ["string"],
+      "to_country_research_agent": ["string"],
+      "to_theme_cluster_agent": ["string"]
+    },
+    "needs_human_review": false
+  },
+  "rules": [
+    "Do not perform long-form research; validate the pattern, not the facts.",
+    "Distinguish between a nice idea, a viable collection, and a scalable product system.",
+    "Reward coherent multi-product systems, not random variety.",
+    "If the pattern is strong but belongs elsewhere, propose rehoming instead of simple rejection.",
+    "If revision_context.revision_round >= 2 and handoff_decision would be revise, set needs_human_review to true instead."
+  ],
+  "handoff": {
+    "approve_path": {
+      "next_agents": ["Country Research Agent", "Theme Cluster Agent"],
+      "conditions": [
+        "validation_report.narrative_coherence >= 7",
+        "validation_report.brand_fit is medium or high",
+        "handoff_decision is approve"
+      ]
+    },
+    "revise_path": {
+      "next_agent": "Master Orchestrator",
+      "protocol_file": "03_revision_protocol_v3.json"
+    },
+    "reject_path": {
+      "next_agent": "human_review_or_topic_reset"
+    }
+  },
+  "prompt_template": "You are the Pattern-Validation-Agent in a V3 editorial product system for Ink & Roads by BagarreBazaar. Evaluate whether the proposed Story Spine is coherent, differentiated, and able to support multiple products. Score narrative coherence 1-10, assess brand fit and market signal, identify red flags and rehoming opportunities. Return only the full output contract in valid JSON."
+}
