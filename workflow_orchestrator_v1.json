@@ -1,0 +1,1700 @@
+{
+  "updatedAt": "2026-05-14T09:13:11.816Z",
+  "createdAt": "2026-05-14T09:13:11.816Z",
+  "id": "6sSPFXo2hSVgIxGE",
+  "name": "Ink & Roads Pipeline v1 \u2014 Claude Restored",
+  "description": null,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Ink & Roads Pipeline v1 \u2014 Claude Restored\n\n**Inserire prima di attivare:**\n- `WORKER_AUTH_TOKEN` nel nodo *Imposta config Hostinger*\n- `GEMINI_API_KEY` nel nodo *Imposta config Hostinger*\n- `SUDOMOCK_API_KEY` nel nodo *Imposta config Hostinger*\n- Credential **S3 account**: endpoint `http://187.124.180.109:9000`, Force Path Style ON\n- Credential **Google Drive account 3** (OAuth) su tutti i nodi Google Drive\n\n**Flusso:** `/importa job_id` \u2192 Drive IN \u2192 worker /importa \u2192 `/confeziona job_id` \u2192 worker /confeziona \u2192 PDF su MinIO \u2192 Mockup SudoMock \u2192 MinIO",
+        "height": 380,
+        "width": 460,
+        "color": 4
+      },
+      "id": "044131c6-ff9d-4de0-a04b-9575fe153e3f",
+      "name": "README",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "eeb4a1be-deeb-495b-ad61-4b1209ce9210",
+      "name": "Telegram Trigger (tutti i comandi)",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        480,
+        160
+      ],
+      "webhookId": "f1f94d53-a96b-4ec9-b45a-5ae848f6f248",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kdp/manual",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "4f5eedc2-88e7-4b8c-bc1a-d6d0cad6d9c6",
+      "name": "Webhook ingresso manuale",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        480,
+        304
+      ],
+      "webhookId": "56ca242b-40dd-4753-894a-837f6467a820"
+    },
+    {
+      "parameters": {},
+      "id": "27bba653-8267-4782-bdfe-59521c8bb2c1",
+      "name": "Manual Trigger Hostinger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        480,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const msg=($input.item.json.message?.text||'').trim();const chatId=String($input.item.json.message?.chat?.id||'');const userId=String($input.item.json.message?.from?.id||'');const parts=msg.split(/\\s+/);const cmd=(parts[0]||'').toLowerCase();if(cmd==='/help'||cmd==='/start'){return [{json:{command:'/help',tema:'',pages:0,job_id:'',chat_id:chatId,user_id:userId,source:'telegram'}}];}if(cmd==='/genera'){const raw=msg.replace(/^\\/genera\\s*/i,'').trim();const chunks=raw.split('|').map(s=>s.trim()).filter(Boolean);const tema=chunks[0]||'auto italiane vintage';const pages=Math.max(3,Math.min(50,parseInt(chunks[1]||'25',10)||25));return [{json:{command:'/genera',tema,pages,job_id:'',chat_id:chatId,user_id:userId,source:'telegram'}}];}if(cmd==='/confeziona'||cmd==='/importa'){return [{json:{command:cmd,tema:'',pages:0,job_id:(parts[1]||''),chat_id:chatId,user_id:userId,source:'telegram'}}];}if(cmd==='/status'){return [{json:{command:'/status',tema:'',pages:0,job_id:(parts[1]||''),chat_id:chatId,user_id:userId,source:'telegram'}}];}return [{json:{command:'unknown',tema:'',pages:0,job_id:'',chat_id:chatId,user_id:userId,source:'telegram',raw:msg}}];"
+      },
+      "id": "0aa9a158-fa6f-4c01-a94f-1618063410a9",
+      "name": "Normalizza Telegram Hostinger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const b=$input.item.json.body||$input.item.json;return [{json:{command:String(b.command||'/genera').toLowerCase(),tema:b.tema||'auto italiane vintage',pages:Math.max(3,Math.min(50,parseInt(b.pages||'25',10)||25)),job_id:b.job_id||'',chat_id:String(b.chat_id||''),user_id:String(b.user_id||''),source:'manual'}}];"
+      },
+      "id": "6489e5f0-20a4-4101-8ee5-d76c22d8a23f",
+      "name": "Normalizza manuale Hostinger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: {\n  ...$input.item.json,\n  WORKER_BASE_URL: \"http://coloringitaly-worker:8000\",\n  WORKFLOW_BASE_URL: \"https://n8n-o2tu.srv1540181.hstgr.cloud\",\n  WORKER_AUTH_TOKEN: \"S8czRFmFirCxCoMHRsa7Ig_BiVIYbDt75nC1T9z9j40\",\n  GEMINI_API_KEY: \"AIzaSyCVde3-tRY-1HH2WAvW6FxmWyH6sC6TvhQ\",\n  SUDOMOCK_API_KEY: \"sm_6b2fbaf39410dd86902d488b6929b91339169a265af575f1bf1680e8062b996a\",\n  DNA_FILE_ID: \"1iYfIZr48l9zWfdOxh1oXw24b0jO1Vhi2\",\n  KDP_ROOT_FOLDER_ID: \"1c-XyHjb3vmcTAKrQawhpY4E7bNMfL11X\",\n  DRIVE_INBOX_ROOT_FOLDER_ID: \"19KQu2zIXFrow5Xwnkkfo4Sv6DM1zcabN\",\n  DRIVE_OUTBOX_ROOT_FOLDER_ID: \"15et_B8UmfT_czP2falBTLITL765Kgnd8\",\n  JOBS_ROOT_PATH: \"/srv/coloringitaly/jobs\",\n  MINIO_URL: \"http://187.124.180.109:9000\",\n  MINIO_BUCKET: \"coloring-outbox\"\n} }];"
+      },
+      "id": "6120b93e-9400-4c77-91a7-6acfabd8bd31",
+      "name": "Imposta config Hostinger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.command }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "/genera"
+            },
+            {
+              "value2": "/confeziona"
+            },
+            {
+              "value2": "/importa"
+            },
+            {
+              "value2": "/status"
+            },
+            {
+              "value2": "/help"
+            }
+          ]
+        },
+        "fallbackOutput": 4
+      },
+      "id": "b0a816e9-00d6-40d0-b8a8-fd50004ed28e",
+      "name": "Router comandi Hostinger",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.job_id }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "aaa65b9a-59cc-4aa2-bae9-06f73823d355",
+      "name": "job_id presente? importa",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        480
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const job_id=$('Router comandi Hostinger').item.json.job_id;\nconst jobs_path=$('Imposta config Hostinger').item.json.JOBS_ROOT_PATH;\nreturn [{json:{job_id,raw_dir:jobs_path+'/'+job_id+'/input/raw'}}];"
+      },
+      "id": "cf7fe3f9-b404-46c1-9654-904bcb586536",
+      "name": "Drive IN - Prepara job v1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Imposta config Hostinger').item.json.WORKER_BASE_URL }}/importa",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Auth-Token",
+              "value": "={{ $('Imposta config Hostinger').item.json.WORKER_AUTH_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ job_id: $json.job_id, chat_id: $json.chat_id, callback_url: \"https://n8n-o2tu.srv1540181.hstgr.cloud/webhook/8566790a-3c69-4219-a36f-8ff248b85c6b/kdp/callback\", book_title: ($json.tema || \"Ink & Roads Coloring Book\") }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "28a6ed7b-f9b9-472d-815e-eb71776e399d",
+      "name": "Drive IN - Prepara cartelle via worker v1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1968,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "fileFolder",
+        "queryString": "=",
+        "limit": 1,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "19KQu2zIXFrow5Xwnkkfo4Sv6DM1zcabN",
+            "mode": "id"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {}
+      },
+      "id": "d4605d7f-e8e0-4e7c-a044-dd2e7e0e178a",
+      "name": "Drive IN - Cerca cartella job v1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2160,
+        400
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "HKKDxK3ia6hmC18t",
+          "name": "Google Drive account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "fileFolder",
+        "searchMethod": "query",
+        "queryString": "=trashed = false",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.id }}",
+            "mode": "id"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {}
+      },
+      "id": "0d133ba3-a876-468e-a8b2-2e9151542a99",
+      "name": "Drive IN - Lista file job v1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2400,
+        400
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "HKKDxK3ia6hmC18t",
+          "name": "Google Drive account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "8a08cd0b-63bc-49f8-8d7a-b38bcd4b07b8",
+      "name": "Drive IN - Scarica file v1",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2640,
+        400
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "HKKDxK3ia6hmC18t",
+          "name": "Google Drive account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const job_id=String($('Router comandi Hostinger').item.json.job_id||'').trim();\nconst file_name=String($json.name||'').replace(/[\\r\\n\\t]/g,'').trim();\nconst local_path=('/srv/coloringitaly/jobs/'+job_id+'/input/raw/'+file_name).replace(/[\\r\\n\\t]/g,'').trim();\nreturn {json:{...$json,job_id,file_name,local_path},binary:$binary};"
+      },
+      "id": "d7270c68-79e1-473d-9fcb-aae9969e9e3e",
+      "name": "Drive IN - Prepara path file v1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2880,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $json.local_path }}",
+        "options": {
+          "append": false
+        }
+      },
+      "id": "a5a9dfa9-00e8-4ad5-8503-b4d55e74c538",
+      "name": "Drive IN - Scrivi raw su disco v1",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        3120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items=$input.all();\nconst job_id=$('Router comandi Hostinger').item.json.job_id;\nconst cover=items.find(i=>i.json.name==='cover.png');\nconst pages=items.filter(i=>i.json.name!=='cover.png');\nreturn [{json:{job_id,downloaded_files:items.length,drive_in_done:true,cover_drive_id:cover?cover.json.id:null,page_drive_ids:pages.map(p=>({name:p.json.name,id:p.json.id}))}}];"
+      },
+      "id": "ecd9417b-6fd6-44f6-a404-3b819fceb940",
+      "name": "Drive IN - Finalizza batch v1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3360,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8001/orchestrate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Auth-Token",
+              "value": "={{ $('Imposta config Hostinger').item.json.WORKER_AUTH_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ command: \"importa\", job_id: $(\"Router comandi Hostinger\").item.json.job_id, chat_id: $(\"Router comandi Hostinger\").item.json.chat_id, tema: $(\"Router comandi Hostinger\").item.json.tema }) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "2788e554-b4fa-49a2-98fb-ab0edb5531c6",
+      "name": "Chiama /importa worker",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        3600,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizza Telegram Hostinger').item.json.chat_id }}",
+        "text": "=\ud83d\udcc2 *Importazione avviata*\n\n\ud83c\udd94 `{{ $('Router comandi Hostinger').item.json.job_id }}`\nIl worker caricher\u00e0 le immagini del job e preparer\u00e0 il packaging.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "47134993-f49f-41d1-8894-cb96d72ef5c4",
+      "name": "Telegram: importazione avviata v1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        3840,
+        400
+      ],
+      "webhookId": "56bbc355-cece-45f3-a6a5-93734109ed97",
+      "retryOnFail": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizza Telegram Hostinger').item.json.chat_id }}",
+        "text": "=\u26a0\ufe0f Uso corretto:\n`/importa job_id`",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "6b0a509f-4006-4ac9-bcb2-e0df98b2d8b2",
+      "name": "Telegram: job_id mancante importa",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        560
+      ],
+      "webhookId": "e71ad11f-3d38-49db-b06a-0559d7f90a79",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.job_id }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "98684f99-5136-4e37-8a84-3dc7d349ff4b",
+      "name": "job_id presente? confeziona",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:8001/orchestrate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Auth-Token",
+              "value": "={{ $('Imposta config Hostinger').item.json.WORKER_AUTH_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ command: \"confeziona\", job_id: $(\"Router comandi Hostinger\").item.json.job_id, chat_id: $(\"Router comandi Hostinger\").item.json.chat_id, tema: $(\"Router comandi Hostinger\").item.json.tema }) }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "b001fb23-cf91-4aef-bf02-adcb0adfc98b",
+      "name": "Chiama /confeziona worker",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1680,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ String($json.chat_id) }}",
+        "text": "=\u2699\ufe0f *Confezionamento avviato*\n\n\ud83c\udd94 `{{ $(\"Router comandi Hostinger\").item.json.job_id }}`\nIl worker sta creando i PDF.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "589a8719-f4c1-47d5-8776-656d2a5db147",
+      "name": "Telegram: confezionamento avviato v1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        208
+      ],
+      "webhookId": "65cf5a38-32a9-4d4d-8dc2-32114f6d5d26",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizza Telegram Hostinger').item.json.chat_id }}",
+        "text": "=\u26a0\ufe0f Uso corretto:\n`/confeziona job_id`",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "956ed31e-4af2-45de-95fe-5abca1a9fdea",
+      "name": "Telegram: job_id mancante confeziona",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        320
+      ],
+      "webhookId": "b463f0fd-a2e5-4db2-8636-be934b786dbf",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $(\"Imposta config Hostinger\").item.json.WORKER_BASE_URL }}/status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Auth-Token",
+              "value": "={{ $('Imposta config Hostinger').item.json.WORKER_AUTH_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 10000
+        },
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "job_id",
+              "value": "={{ $json.job_id }}"
+            }
+          ]
+        }
+      },
+      "id": "8c21f6d6-7438-49cc-9b48-2eecc0635224",
+      "name": "Chiama /status worker",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1440,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizza Telegram Hostinger').item.json.chat_id }}",
+        "text": "=\ud83d\udcca *Status job*\n\n\ud83c\udd94 `{{ $('Router comandi Hostinger').item.json.job_id }}`\nStatus: `{{ $json.status }}`",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "f3d48879-4562-49a8-bc3d-30c737850e3d",
+      "name": "Telegram: status job v1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1776,
+        48
+      ],
+      "webhookId": "792eb1ce-2241-48e5-a990-a220b7efb29f",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizza Telegram Hostinger').item.json.chat_id }}",
+        "text": "=\ud83e\udd16 *ColoringItaly KDP Bot*\n\nComandi disponibili:\n\u2022 `/importa job_id` \u2014 scarica file da Drive e prepara il job\n\u2022 `/confeziona job_id` \u2014 genera i 4 PDF KDP/Etsy\n\u2022 `/status job_id` \u2014 controlla lo stato del job\n\u2022 `/help` \u2014 questo messaggio",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "60da13ec-05f8-40df-9aaa-607a6c00eda2",
+      "name": "Telegram: help v1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        -112
+      ],
+      "webhookId": "dcb73f68-d513-454a-9fcf-7e7c6efd68b7",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalizza Telegram Hostinger').item.json.chat_id }}",
+        "text": "=\u26a0\ufe0f Comando non riconosciuto. Usa `/help`.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "067466a3-8966-4eac-aa89-4c8b78d99fc9",
+      "name": "Telegram: comando non riconosciuto",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        640
+      ],
+      "webhookId": "6f0a5a49-a30a-4486-a309-c31e497c1ade",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kdp/callback",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "f61c1b5e-cc7a-4e2d-a3f7-8f05042955c0",
+      "name": "Webhook callback worker",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        480,
+        880
+      ],
+      "webhookId": "8566790a-3c69-4219-a36f-8ff248b85c6b"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{json:$json.body||{}}];"
+      },
+      "id": "e5b6ef87-37ea-42e3-afc4-ca92733b2d51",
+      "name": "Normalizza callback worker",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.status }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "images_ready"
+            },
+            {
+              "value2": "approval_needed"
+            },
+            {
+              "value2": "pdf_ready"
+            },
+            {
+              "value2": "done"
+            },
+            {
+              "value2": "error"
+            }
+          ]
+        },
+        "fallbackOutput": 4
+      },
+      "id": "098d1600-2b2c-4603-b7fe-94997061014d",
+      "name": "Tipo callback worker",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [
+        960,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.local_path }}",
+        "options": {
+          "dataPropertyName": "data"
+        }
+      },
+      "id": "a901045b-660b-45dd-9e49-f08812db6850",
+      "name": "Drive OUT - Leggi PDF da disco v1",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        608
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "coloring-outbox",
+        "fileName": "={{ $json.minio_key }}",
+        "additionalFields": {}
+      },
+      "id": "0a457f0a-4300-441f-889e-8807e91b15ce",
+      "name": "Carica PDF su MinIO",
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        800
+      ],
+      "credentials": {
+        "s3": {
+          "id": "9vDSUcPwqLFFuSFT",
+          "name": "S3 account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ String($json.chat_id) }}",
+        "text": "=\ud83d\udcc4 *PDF pronti*\n\nJob `{{ $('Normalizza callback worker').item.json.job_id }}`\nDisponibili su MinIO: `coloring-outbox/{{ $('Normalizza callback worker').item.json.job_id }}/`",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "defc9052-71f1-439c-a641-f147bfce4549",
+      "name": "Telegram: PDF pronti v1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        960
+      ],
+      "webhookId": "308b5983-fa0f-4dae-83d3-2656ff384f4e",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const job_id = $('Normalizza callback worker').item.json.job_id;\nconst jobs_path = '/srv/coloringitaly/jobs';\nconst normalizedPath = jobs_path + '/' + job_id + '/input/normalized/';\n\nconst mockups = [\n  {mockup_uuid:'e721f3f5-ba74-4057-97bf-4c323f090954',so_uuid:'b12ca808-b0c5-4b8b-9f89-50237ff7d51a'},\n  {mockup_uuid:'e10074a2-8868-4161-803e-b0ca9dc9fec4',so_uuid:'0b2ef42c-cbc0-4810-bc67-740e07c03017'},\n  {mockup_uuid:'00d8bc42-1c57-4891-9c47-60b440ccb9e1',so_uuid:'3fb9c374-7943-4d4b-8d5b-c38dbbcac54f'},\n  {mockup_uuid:'c01264f9-c2f8-4958-a4f1-3cd14a563689',so_uuid:'325d2e1f-3de7-4aee-8554-d4044db419ac'},\n  {mockup_uuid:'0e1f5f98-7ea9-4573-87a7-f47a455b18cd',so_uuid:'ac87dfa3-4710-4426-b796-af2bf37a9c89'},\n  {mockup_uuid:'ec1d71b7-c3e5-4bee-95a6-b12763df6c4a',so_uuid:'be2cb548-e093-4e18-86b4-046d800165ad'},\n  {mockup_uuid:'7fd2607f-a1a1-494e-b930-6c48d43b3578',so_uuid:'867d9222-ef4e-439b-802e-d56f27c65e3e'},\n  {mockup_uuid:'23784a91-10b3-4cb1-bf8b-6972a6c594bd',so_uuid:'7cfa2dd2-7584-471e-bc85-f28d8e54a55a'},\n  {mockup_uuid:'7f3c1138-3683-4647-8f18-82ecd36fd2af',so_uuid:'a6eb1ec9-f9f5-4175-adae-30bbec0b6c5c'},\n  {mockup_uuid:'b19280c2-1c59-4cbc-b357-99a802eb8273',so_uuid:'af28c460-34aa-404c-b93d-09fc12e6d621'},\n  {mockup_uuid:'91e89051-6eb6-4bc3-a078-05eb7e6072f1',so_uuid:'673ea213-0211-44e0-951f-ef687703c1d6'},\n  {mockup_uuid:'b5715bc0-042a-4b9d-b68b-313b9193e254',so_uuid:'e2109a5a-529c-4f88-a232-d2421ae66d69'},\n  {mockup_uuid:'9da3727c-f88a-421b-b76f-2c04be42b24e',so_uuid:'41911aea-6443-4789-889a-ed71dabfca17'},\n  {mockup_uuid:'14a9e009-7545-4f12-8bac-823cb6bb9f24',so_uuid:'f517384f-a585-4563-ae1d-f76d4bf1f852'},\n  {mockup_uuid:'18edc4ee-d53c-4689-972a-77601871988e',so_uuid:'e15d6cde-5797-4d3d-9e95-1c3b35a2b45e'},\n  {mockup_uuid:'fa3decc7-22d2-44ed-980a-b8d79043f75b',so_uuid:'0d535706-10d2-41d0-91f0-95ec3e70408c'},\n  {mockup_uuid:'ae0b37a2-5d6c-40b7-8040-fa676bc3d69f',so_uuid:'b519cf3d-3ff1-409d-b439-41abe4f7e2f1'},\n  {mockup_uuid:'45ce9419-59a3-40ea-8fb1-4fb459073f6e',so_uuid:'8bcddf78-d2e0-4d1b-879e-d885daa7462a'},\n  {mockup_uuid:'10d9b1cf-f919-4a16-a77b-b829d72bcb5c',so_uuid:'49ebf79a-7289-4df7-92d3-8a62a8be94fb'},\n  {mockup_uuid:'256b1d1f-1791-42cc-9244-639fbc7752fb',so_uuid:'6462916d-205e-4026-8102-7dfeb805582e'},\n];\n\nconst shuffledMockups = mockups.sort(() => Math.random() - 0.5).slice(0, 5);\n\n// Cover\nconst coverPath = normalizedPath + 'cover.png';\n\n// Pagine normalizzate \u2014 cerca page_01 fino a page_25\nconst pageFiles = [];\nfor (let i = 1; i <= 25; i++) {\n  pageFiles.push(normalizedPath + 'page_' + String(i).padStart(2, '0') + '.png');\n}\n\n// Mescola e prendi 4 pagine casuali\nconst shuffledPages = pageFiles.sort(() => Math.random() - 0.5).slice(0, 4);\n\nconst images = [\n  coverPath,\n  shuffledPages[0],\n  shuffledPages[1],\n  shuffledPages[2],\n  shuffledPages[3]\n];\n\nreturn shuffledMockups.map((m, i) => ({\n  json: {\n    job_id,\n    mockup_uuid: m.mockup_uuid,\n    so_uuid: m.so_uuid,\n    mockup_index: i + 1,\n    image_path: images[i] || coverPath\n  }\n}));"
+      },
+      "id": "da0d5c16-2e7c-4030-9150-7a2b5e1fec75",
+      "name": "Mockup - Prepara dati",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        1136
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json.image_path }}",
+        "options": {}
+      },
+      "id": "25bad8c9-f543-4d67-ac1b-7ba2938e0e41",
+      "name": "Mockup - Leggi immagine",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        1120
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const mockup=$('Mockup - Prepara dati').item.json;\nreturn {\n  json:{\n    job_id:mockup.job_id,\n    mockup_uuid:mockup.mockup_uuid,\n    so_uuid:mockup.so_uuid,\n    mockup_index:mockup.mockup_index,\n    image_path:mockup.image_path\n  },\n  binary:$binary\n};"
+      },
+      "id": "ae918b9b-faf3-4b8b-a7ad-85e1147f4143",
+      "name": "Mockup - Riaggrega dati",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "coloring-outbox",
+        "fileName": "={{ $json.job_id + '/mockup_img_' + $json.mockup_index + '.png' }}",
+        "additionalFields": {}
+      },
+      "id": "e0e08be7-866a-4f78-a0ff-fd43b4532038",
+      "name": "Mockup - Upload immagine MinIO",
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        1120
+      ],
+      "credentials": {
+        "s3": {
+          "id": "9vDSUcPwqLFFuSFT",
+          "name": "S3 account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.sudomock.com/api/v1/renders",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "sm_6b2fbaf39410dd86902d488b6929b91339169a265af575f1bf1680e8062b996a"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  mockup_uuid: $('Mockup - Riaggrega dati').item.json.mockup_uuid,\n  smart_objects: [{\n    uuid: $('Mockup - Riaggrega dati').item.json.so_uuid,\n    asset: {\n      url: 'http://187.124.180.109:9000/coloring-outbox/' + $('Mockup - Riaggrega dati').item.json.job_id + '/mockup_img_' + $('Mockup - Riaggrega dati').item.json.mockup_index + '.png',\n      fit: 'cover'\n    }\n  }],\n  export_options: { image_format: 'webp', image_size: 1920, quality: 90 }\n}) }}\n",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 3000
+            }
+          }
+        }
+      },
+      "id": "28b093be-327a-47fe-88aa-1426482f6e86",
+      "name": "Mockup - Chiama SudoMock",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2160,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.print_files[0].export_path }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "1a2f6263-920f-4592-a609-42d00f832125",
+      "name": "Mockup - Scarica webp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        2400,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "coloring-outbox",
+        "fileName": "={{ $('Mockup - Riaggrega dati').item.json.job_id + '/mockups/mockup_' + $('Mockup - Riaggrega dati').item.json.mockup_index + '.webp' }}",
+        "additionalFields": {}
+      },
+      "id": "2eca4cf1-bd2b-41b7-b61b-5b190b33d51e",
+      "name": "Mockup - Upload webp MinIO",
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        1120
+      ],
+      "credentials": {
+        "s3": {
+          "id": "9vDSUcPwqLFFuSFT",
+          "name": "S3 account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ String($json.chat_id) }}",
+        "text": "=\ud83c\udfa8 *Mockup pronti*\n\nJob `{{ $('Normalizza callback worker').item.json.job_id }}`\nSu MinIO: `coloring-outbox/{{ $('Normalizza callback worker').item.json.job_id }}/mockups/`",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "4105bd82-13c5-4c4a-a4ab-20df2b9e5e9d",
+      "name": "Telegram: mockup pronti v1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        1120
+      ],
+      "webhookId": "26ba1bb0-09f9-4f85-b4d0-b0f3ba5ba2d0",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ String($json.chat_id) }}",
+        "text": "=\ud83c\udf89 *Prodotto completo*\n\nJob `{{ $json.job_id }}`",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "6cdb729e-dd65-42c0-bc15-169d9f0ad9e1",
+      "name": "Telegram: prodotto completo v1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1776,
+        992
+      ],
+      "webhookId": "c0f7866b-47a0-4dc2-9c8c-4247e7afd3dd",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "87145a5c-e0be-444c-923a-8f6ed0fb1195",
+              "leftValue": "={{ $json.chat_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2b69d178-b8bb-48fb-953b-4b9853a688b1",
+      "name": "chat_id presente? callback errore",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1184,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ String($json.chat_id) }}",
+        "text": "=\u274c *Errore job*\n\n\ud83c\udd94 `{{ $json.job_id }}`\n{{ $json.error || 'Errore generico' }}",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "id": "ab6dc9ec-ac81-48f4-a97f-17d9c51052a3",
+      "name": "Telegram: errore callback v1",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        1280
+      ],
+      "webhookId": "cd125289-23d6-4c7f-ae61-203efec8960f",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const jobId = $('Normalizza callback worker').item.json.job_id;\nconst outputDir = `/srv/coloringitaly/jobs/${jobId}/output`;\n\nconst files = [\n  'coloring_book_etsy.zip',\n  'coloring_book_kdp_us_letter.pdf',\n  'coloring_book_kdp_a4.pdf'\n];\n\nreturn files.map(filename => ({\n  json: {\n    job_id: jobId,\n    filename: filename,\n    local_path: `${outputDir}/${filename}`,\n    minio_key: `${jobId}/${filename}`\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        832
+      ],
+      "id": "1a47357c-9714-4c42-8ce0-a837b6815e02",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "chatId": "1278502948",
+        "text": "=\u2705 SEO listing pronto per {{ $json.job_id }}!\n\n\ud83d\udcdd Titolo: {{ $json.seo_title }}\n\n\ud83c\udff7 Tag: {{ $json.seo_tags }}\n\n\ud83d\udcc4 File completo:\nhttp://187.124.180.109:9000/coloring-outbox/{{ $json.minio_key }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3168,
+        1344
+      ],
+      "id": "93f8413c-0f8c-4520-967f-3bf0c5ef465b",
+      "name": "Send a text message",
+      "webhookId": "27122756-ced2-4f98-bd96-a765da429cac",
+      "credentials": {
+        "telegramApi": {
+          "id": "anMsnJlV9hgsCHSO",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.candidates[0].content.parts[0].text;\nconst clean = raw.replace(/```json|```/g, '').trim();\nconst seo = JSON.parse(clean);\n\nconst jobId = $('Normalizza callback worker').item.json.job_id;\nconst bookTitle = $('Normalizza callback worker').item.json.book_title;\n\nconst testo = `COLORINGITALY \u2014 SEO LISTING\nJob: ${jobId}\nTema: ${bookTitle}\nGenerato: ${new Date().toISOString()}\n\n========================================\nTITOLO ETSY (max 140 caratteri)\n========================================\n${seo.title}\n\n========================================\nTAG ETSY (13 tag)\n========================================\n${seo.tags.join(', ')}\n\n========================================\nDESCRIZIONE\n========================================\n${seo.description}\n`;\n\nreturn [{\n  json: {\n    job_id: jobId,\n    seo_title: seo.title,\n    seo_tags: seo.tags.join(', '),\n    seo_description: seo.description,\n    full_text: testo,\n    filename: `${jobId}_seo_listing.txt`,\n    local_path: `/srv/coloringitaly/jobs/${jobId}/${jobId}_seo_listing.txt`,\n    minio_key: `${jobId}/${jobId}_seo_listing.txt`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3536,
+        928
+      ],
+      "id": "aed19f0e-f727-4b50-a6de-a8157c78b456",
+      "name": "SEO - Formatta testo"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyCVde3-tRY-1HH2WAvW6FxmWyH6sC6TvhQ",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.gemini_body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3248,
+        912
+      ],
+      "id": "879b1492-5eb4-431a-9cf8-6711695d674a",
+      "name": "SEO - Chiama Gemini"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://coloringitaly-worker:8000/write-seo",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"job_id\": \"{{ $json.job_id }}\",\n  \"content\": \"{{ $json.full_text }}\",\n  \"filename\": \"{{ $json.filename }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3552,
+        1152
+      ],
+      "id": "84f8467a-1281-41e1-8822-3269a6fed404",
+      "name": "SEO - Scrivi su disco"
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "coloring-outbox",
+        "fileName": "={{ $json.minio_key }}",
+        "binaryData": false,
+        "fileContent": "={{ $('SEO - Scrivi su disco').item.json.path }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        3520,
+        1328
+      ],
+      "id": "ec8d9d47-ca12-441a-824e-c59216d204db",
+      "name": "SEO - Upload su MinIO",
+      "credentials": {
+        "s3": {
+          "id": "9vDSUcPwqLFFuSFT",
+          "name": "S3 account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const bookTitle = $('Normalizza callback worker').item.json.book_title || 'coloring book';\n\nconst prompt = `Sei un esperto SEO per Etsy specializzato in coloring book digitali. Genera il listing per un coloring book con tema: ${bookTitle}.\n\nRispondi SOLO con JSON valido senza markdown, senza backtick, senza spiegazioni:\n{\"title\": \"titolo SEO max 140 caratteri\", \"tags\": [\"tag1\",\"tag2\",\"tag3\",\"tag4\",\"tag5\",\"tag6\",\"tag7\",\"tag8\",\"tag9\",\"tag10\",\"tag11\",\"tag12\",\"tag13\"], \"description\": \"descrizione in inglese min 300 parole ottimizzata per Etsy che spiega il prodotto, i formati inclusi US Letter e A4, il numero di pagine, come scaricarlo e usarlo\"}`;\n\nconst body = {\n  contents: [{\n    parts: [{\n      text: prompt\n    }]\n  }]\n};\n\nreturn [{\n  json: {\n    gemini_body: JSON.stringify(body),\n    job_id: $('Normalizza callback worker').item.json.job_id,\n    book_title: bookTitle\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3024,
+        912
+      ],
+      "id": "74da9a19-ecf4-4b2e-b05c-4312cc01cf34",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "id": "07edbd44-0629-424d-82a4-38a9c5b64bbb",
+      "name": "Prepara path PDF output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        208
+      ],
+      "parameters": {
+        "jsCode": "\nconst job_id = $json.job_id;\nconst outputs = $json.outputs || {};\nconst base_path = '/srv/coloringitaly/jobs/' + job_id + '/output/';\n\nreturn Object.entries(outputs).map(([filename, size]) => ({\n  json: {\n    job_id,\n    local_path: base_path + filename,\n    minio_key: job_id + '/' + filename,\n    fileName: filename,\n    fileSize: size\n  }\n}));\n"
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger (tutti i comandi)": {
+      "main": [
+        [
+          {
+            "node": "Normalizza Telegram Hostinger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook ingresso manuale": {
+      "main": [
+        [
+          {
+            "node": "Normalizza manuale Hostinger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger Hostinger": {
+      "main": [
+        [
+          {
+            "node": "Normalizza manuale Hostinger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizza Telegram Hostinger": {
+      "main": [
+        [
+          {
+            "node": "Imposta config Hostinger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizza manuale Hostinger": {
+      "main": [
+        [
+          {
+            "node": "Imposta config Hostinger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Imposta config Hostinger": {
+      "main": [
+        [
+          {
+            "node": "Router comandi Hostinger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router comandi Hostinger": {
+      "main": [
+        [],
+        [
+          {
+            "node": "job_id presente? confeziona",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "job_id presente? importa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chiama /status worker",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: help v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "job_id presente? importa": {
+      "main": [
+        [
+          {
+            "node": "Drive IN - Prepara job v1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: job_id mancante importa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive IN - Prepara job v1": {
+      "main": [
+        [
+          {
+            "node": "Drive IN - Prepara cartelle via worker v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive IN - Prepara cartelle via worker v1": {
+      "main": [
+        [
+          {
+            "node": "Drive IN - Cerca cartella job v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive IN - Cerca cartella job v1": {
+      "main": [
+        [
+          {
+            "node": "Drive IN - Lista file job v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive IN - Lista file job v1": {
+      "main": [
+        [
+          {
+            "node": "Drive IN - Scarica file v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive IN - Scarica file v1": {
+      "main": [
+        [
+          {
+            "node": "Drive IN - Prepara path file v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive IN - Prepara path file v1": {
+      "main": [
+        [
+          {
+            "node": "Drive IN - Scrivi raw su disco v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive IN - Scrivi raw su disco v1": {
+      "main": [
+        [
+          {
+            "node": "Drive IN - Finalizza batch v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive IN - Finalizza batch v1": {
+      "main": [
+        [
+          {
+            "node": "Chiama /importa worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chiama /importa worker": {
+      "main": [
+        [
+          {
+            "node": "Telegram: importazione avviata v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "job_id presente? confeziona": {
+      "main": [
+        [
+          {
+            "node": "Chiama /confeziona worker",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: job_id mancante confeziona",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chiama /confeziona worker": {
+      "main": [
+        [
+          {
+            "node": "Prepara path PDF output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chiama /status worker": {
+      "main": [
+        [
+          {
+            "node": "Telegram: status job v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook callback worker": {
+      "main": [
+        [
+          {
+            "node": "Normalizza callback worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizza callback worker": {
+      "main": [
+        [
+          {
+            "node": "Tipo callback worker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tipo callback worker": {
+      "main": [
+        [],
+        [],
+        [
+          {
+            "node": "Telegram: PDF pronti v1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Mockup - Prepara dati",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: prodotto completo v1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Mockup - Prepara dati",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "chat_id presente? callback errore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive OUT - Leggi PDF da disco v1": {
+      "main": [
+        [
+          {
+            "node": "Carica PDF su MinIO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mockup - Prepara dati": {
+      "main": [
+        [
+          {
+            "node": "Mockup - Leggi immagine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mockup - Leggi immagine": {
+      "main": [
+        [
+          {
+            "node": "Mockup - Riaggrega dati",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mockup - Riaggrega dati": {
+      "main": [
+        [
+          {
+            "node": "Mockup - Upload immagine MinIO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mockup - Upload immagine MinIO": {
+      "main": [
+        [
+          {
+            "node": "Mockup - Chiama SudoMock",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mockup - Chiama SudoMock": {
+      "main": [
+        [
+          {
+            "node": "Mockup - Scarica webp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mockup - Scarica webp": {
+      "main": [
+        [
+          {
+            "node": "Mockup - Upload webp MinIO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mockup - Upload webp MinIO": {
+      "main": [
+        [
+          {
+            "node": "Telegram: mockup pronti v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "chat_id presente? callback errore": {
+      "main": [
+        [
+          {
+            "node": "Telegram: errore callback v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Drive OUT - Leggi PDF da disco v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram: mockup pronti v1": {
+      "main": [
+        []
+      ]
+    },
+    "SEO - Formatta testo": {
+      "main": [
+        [
+          {
+            "node": "SEO - Scrivi su disco",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEO - Chiama Gemini": {
+      "main": [
+        [
+          {
+            "node": "SEO - Formatta testo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEO - Scrivi su disco": {
+      "main": [
+        [
+          {
+            "node": "SEO - Upload su MinIO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEO - Upload su MinIO": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "SEO - Chiama Gemini",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "b001fb23-cf91-4aef-bf02-adcb0adfc98b": [
+      {
+        "node": "07edbd44-0629-424d-82a4-38a9c5b64bbb",
+        "type": "main",
+        "index": 0
+      }
+    ],
+    "07edbd44-0629-424d-82a4-38a9c5b64bbb": [
+      {
+        "node": "a901045b-660b-45dd-9e49-f08812db6850",
+        "type": "main",
+        "index": 0
+      }
+    ],
+    "a901045b-660b-45dd-9e49-f08812db6850": [
+      {
+        "node": "0a457f0a-4300-441f-889e-8807e91b15ce",
+        "type": "main",
+        "index": 0
+      }
+    ],
+    "Prepara path PDF output": {
+      "main": [
+        [
+          {
+            "node": "Drive OUT - Leggi PDF da disco v1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "861913fd-80ea-4cdc-979c-c71216669820",
+  "activeVersionId": null,
+  "versionCounter": 1,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-05-14T09:13:11.818Z",
+      "createdAt": "2026-05-14T09:13:11.818Z",
+      "role": "workflow:owner",
+      "workflowId": "6sSPFXo2hSVgIxGE",
+      "projectId": "4aXyiHIowm155NCe",
+      "project": {
+        "updatedAt": "2026-03-29T20:00:57.627Z",
+        "createdAt": "2026-03-29T19:57:46.090Z",
+        "id": "4aXyiHIowm155NCe",
+        "name": "mattia rossi <svapowebnovoli@gmail.com>",
+        "type": "personal",
+        "icon": null,
+        "description": null,
+        "creatorId": "08d3641b-c218-420f-837b-366962ba29f5"
+      }
+    }
+  ],
+  "tags": [],
+  "activeVersion": null
+}
