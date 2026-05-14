@@ -300,6 +300,13 @@ def parse_job_id(job_id: str) -> dict:
     return {"country": country, "theme": theme, "seq": seq}
 
 
+def extract_book_title_from_job_id(job_id: str) -> str:
+    job_info = parse_job_id(job_id)
+    country = job_info.get("country", "").capitalize()
+    theme = job_info.get("theme", "").capitalize()
+    return f"{country} {theme}".strip()
+
+
 def add_pdf_metadata(pdf_path: Path, book_title: str, country: str = "", theme: str = ""):
     try:
         writer = PdfWriter()
@@ -429,8 +436,9 @@ def importa():
 
     if not job_id:
         return jsonify({"ok": False, "error": "job_id mancante"}), 400
+
     if not book_title:
-        return jsonify({"ok": False, "error": "book_title mancante"}), 400
+        book_title = extract_book_title_from_job_id(job_id)
 
     try:
         dirs = ensure_job_dirs(job_id)
